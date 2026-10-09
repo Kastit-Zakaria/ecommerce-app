@@ -1,8 +1,12 @@
 :root {
-    --color-1: #212529;
-    --color-2: #f8f9fa;
+    --color-text: #111111;
+    --color-muted: #6b6b6b;
+    --color-border: #e6e6e6;
+    --color-bg: #ffffff;
 }
 
 body {
-    background: var(--color-2);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'Jost', sans-serif;
 }
