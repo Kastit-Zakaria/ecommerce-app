@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import HeroVideo from '../components/HeroVideo';
+import Reassurance from '../components/Reassurance';
 import ProductList from '../components/ProductList';
 import ProductModal from '../components/ProductModal';
 
@@ -27,6 +28,8 @@ const Home = ({ selectedCategory }) => {
     return (
         <div className="home-page">
             <HeroVideo />
+
+            <Reassurance />
 
             <div id="produits" ref={productsRef}>
                 <ProductList
