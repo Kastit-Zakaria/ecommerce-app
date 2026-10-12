@@ -1,0 +1,75 @@
+.universes {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 64px 24px 16px;
+}
+
+.universes__title {
+    margin: 0 0 24px;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.universes__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+/* Une carte d'univers */
+.universe-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.universe-card__image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    transition: transform 0.4s;
+}
+
+/* Léger zoom de l'image au survol */
+.universe-card:hover .universe-card__image {
+    transform: scale(1.04);
+}
+
+/* Nom + lien, posés sur l'image en bas à gauche */
+.universe-card__label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 48px 20px 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+    color: #ffffff;
+    text-align: left;
+}
+
+.universe-card__name {
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.universe-card__link {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
