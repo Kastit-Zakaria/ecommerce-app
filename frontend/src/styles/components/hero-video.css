@@ -1,0 +1,86 @@
+/* Hauteur = écran - (bandeau + header + catégories) */
+.hero-video {
+    position: relative;
+    height: calc(100vh - var(--announcement-height) - var(--header-main-height) - var(--categories-height));
+    min-height: 420px;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    color: #ffffff;
+}
+
+/* Couche 1 : la vidéo remplit toute la section */
+.hero-video__media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+/* Couche 2 : un dégradé sombre en bas pour que le texte reste lisible */
+.hero-video__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 60%);
+    z-index: 1;
+}
+
+/* Couche 3 : le texte et le bouton */
+.hero-video__content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    width: 100%;
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0 48px 64px;
+}
+
+.hero-video__subtitle {
+    margin: 0;
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}
+
+.hero-video__title {
+    margin: 0;
+    font-size: 64px;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.hero-video__button {
+    display: inline-block;
+    padding: 14px 28px;
+    background: #ffffff;
+    color: var(--color-text);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.hero-video__button:hover {
+    background: var(--color-text);
+    color: #ffffff;
+}
+
+/* Sur téléphone : titre plus petit, marges réduites */
+@media (max-width: 720px) {
+    .hero-video__content {
+        padding: 0 24px 40px;
+    }
+
+    .hero-video__title {
+        font-size: 36px;
+    }
+}

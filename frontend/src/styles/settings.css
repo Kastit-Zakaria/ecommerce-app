@@ -3,6 +3,15 @@
     --color-muted: #6b6b6b;
     --color-border: #e6e6e6;
     --color-bg: #ffffff;
+
+    /* Hauteurs du haut de page (utilisées pour calculer la taille de la vidéo) */
+    --announcement-height: 36px;
+    --header-main-height: 64px;
+    --categories-height: 48px;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 body {

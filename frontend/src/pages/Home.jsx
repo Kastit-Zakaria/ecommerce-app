@@ -1,11 +1,18 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import CategoryList from '../components/CategoryList';
+import HeroVideo from '../components/HeroVideo';
 import ProductList from '../components/ProductList';
 import ProductModal from '../components/ProductModal';
 
 const Home = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const productsRef = useRef(null);
+
+    const handleSelectCategory = (category) => {
+        setSelectedCategory(category);
+        productsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
 
     let modal = null;
     if (selectedProduct !== null) {
@@ -21,12 +28,18 @@ const Home = () => {
         <div className="home-page">
             <CategoryList
                 selectedCategory={selectedCategory}
-                onSelect={setSelectedCategory}
+                onSelect={handleSelectCategory}
             />
-            <ProductList
-                category={selectedCategory}
-                onSelectProduct={setSelectedProduct}
-            />
+
+            <HeroVideo />
+
+            <div id="produits" ref={productsRef}>
+                <ProductList
+                    category={selectedCategory}
+                    onSelectProduct={setSelectedProduct}
+                />
+            </div>
+
             {modal}
         </div>
     );

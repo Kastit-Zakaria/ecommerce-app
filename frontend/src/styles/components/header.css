@@ -1,0 +1,108 @@
+.header {
+    background: var(--color-bg);
+}
+
+/* Bandeau d'annonce : hauteur fixe */
+.header__announcement {
+    height: var(--announcement-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    overflow: hidden;
+    white-space: nowrap;
+    background: var(--color-text);
+    color: #ffffff;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+/* Ligne principale : hauteur fixe, 3 colonnes, logo au centre */
+.header__main {
+    height: var(--header-main-height);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Liens à gauche */
+.header__nav {
+    display: flex;
+    gap: 20px;
+}
+
+.header__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    border-bottom: 1px solid transparent;
+    color: var(--color-text);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+}
+
+.header__link:hover {
+    border-bottom-color: #bbbbbb;
+}
+
+/* Classe ajoutée automatiquement par NavLink */
+.header__link.active {
+    border-bottom-color: var(--color-text);
+}
+
+/* Logo au centre */
+.header__logo {
+    padding-left: 0.32em;
+    color: var(--color-text);
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-decoration: none;
+}
+
+/* Actions à droite */
+.header__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+}
+
+.header__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+}
+
+.header__action:hover {
+    color: var(--color-muted);
+}
+
+/* Sur téléphone : on garde seulement les icônes */
+@media (max-width: 720px) {
+    .header__action-label {
+        display: none;
+    }
+
+    .header__nav {
+        gap: 12px;
+    }
+
+    .header__logo {
+        font-size: 22px;
+    }
+}

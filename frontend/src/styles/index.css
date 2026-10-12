@@ -1,6 +1,9 @@
 @import "./settings.css";
 @import "./pages/home.css";
 @import "./pages/about.css";
-@import "./components/product-modal.css";
+@import "./components/header.css";
 @import "./components/category-list.css";
+@import "./components/hero-video.css";
 @import "./components/product-list.css";
+@import "./components/product-modal.css";
+@import "./components/footer.css";
