@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 
-const CategoryList = () => {
+const CategoryList = ({ selectedCategory, onSelect }) => {
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
@@ -16,11 +16,22 @@ const CategoryList = () => {
 
     return (
         <nav className="category-list">
-            {categories.map((category) => (
-                <button key={category.id} className="category-list__item">
-                    {category.name}
-                </button>
-            ))}
+            {categories.map((category) => {
+                let className = 'category-list__item';
+                if (selectedCategory !== null && selectedCategory.id === category.id) {
+                    className = 'category-list__item category-list__item--active';
+                }
+
+                return (
+                    <button
+                        key={category.id}
+                        className={className}
+                        onClick={() => onSelect(category)}
+                    >
+                        {category.name}
+                    </button>
+                );
+            })}
         </nav>
     );
 };
