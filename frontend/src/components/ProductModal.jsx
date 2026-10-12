@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-
-// Transforme 64.9 en "64,90 €"
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' }).format(price);
-};
+import formatPrice from '../utils/formatPrice';
 
 const ProductModal = ({ productId, onClose }) => {
     const [product, setProduct] = useState(null);
