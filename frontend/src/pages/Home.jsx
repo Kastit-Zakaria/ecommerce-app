@@ -3,6 +3,7 @@ import HeroVideo from '../components/HeroVideo';
 import Reassurance from '../components/Reassurance';
 import Universes from '../components/Universes';
 import ProductList from '../components/ProductList';
+import EditorialBanner from '../components/EditorialBanner';
 import ProductModal from '../components/ProductModal';
 
 const Home = ({ selectedCategory, onSelectCategory }) => {
@@ -40,6 +41,8 @@ const Home = ({ selectedCategory, onSelectCategory }) => {
                     onSelectProduct={setSelectedProduct}
                 />
             </div>
+
+            <EditorialBanner />
 
             {modal}
         </div>
