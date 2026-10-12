@@ -1,0 +1,196 @@
+.footer {
+    margin-top: 72px;
+    background: #f4f4f2;
+    color: var(--color-text);
+}
+
+/* Largeur maximale commune aux 3 parties */
+.footer__container {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+/* ===== 1. Newsletter ===== */
+.footer__newsletter {
+    border-bottom: 1px solid #dededa;
+}
+
+.footer__newsletter-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+    padding-top: 56px;
+    padding-bottom: 56px;
+}
+
+.footer__newsletter-text {
+    flex: 1 1 360px;
+}
+
+.footer__overline {
+    margin: 0 0 10px;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+}
+
+.footer__newsletter-title {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.footer__form {
+    flex: 1 1 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer__label {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.footer__form-row {
+    display: flex;
+}
+
+.footer__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 52px;
+    padding: 0 16px;
+    border: 1px solid var(--color-text);
+    border-right: none;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 15px;
+}
+
+.footer__submit {
+    min-height: 52px;
+    padding: 0 28px;
+    border: 1px solid var(--color-text);
+    background: var(--color-text);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.footer__hint {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-muted);
+}
+
+/* ===== 2. Colonnes de liens ===== */
+.footer__columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 40px;
+    padding-top: 56px;
+    padding-bottom: 40px;
+}
+
+.footer__column {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.footer__heading {
+    margin: 0 0 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}
+
+.footer__link {
+    padding: 6px 0;
+    color: var(--color-text);
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.footer__link:hover {
+    text-decoration: underline;
+}
+
+.footer__socials {
+    display: flex;
+    gap: 8px;
+}
+
+.footer__social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--color-text);
+    color: var(--color-text);
+}
+
+.footer__social:hover {
+    background: var(--color-text);
+    color: #ffffff;
+}
+
+.footer__payments {
+    margin: 16px 0 0;
+    font-size: 13px;
+    color: var(--color-muted);
+}
+
+/* ===== 3. Barre finale ===== */
+.footer__bottom {
+    border-top: 1px solid #dededa;
+}
+
+.footer__bottom-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 20px;
+    padding-bottom: 32px;
+}
+
+.footer__logo {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+}
+
+.footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer__legal-link,
+.footer__copyright {
+    color: var(--color-muted);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.footer__legal-link:hover {
+    text-decoration: underline;
+}
