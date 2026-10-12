@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 
-const ProductList = ({ category }) => {
+const ProductList = ({ category, onSelectProduct }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -38,10 +38,19 @@ const ProductList = ({ category }) => {
         content = (
             <div className="product-list__grid">
                 {products.map((product) => (
-                    <button key={product.id} type="button" className="product-card">
-                        <img src={product.imageUrl} alt={product.name} className="product-card__image" />
-                        <span className="product-card__tooltip">{product.name}</span>
-                    </button>
+                    <article key={product.id} className="product-card">
+                        <div className="product-card__media">
+                            <img src={product.imageUrl} alt={product.name} className="product-card__image" />
+                            <span className="product-card__tooltip">{product.name}</span>
+                        </div>
+                        <button
+                            type="button"
+                            className="product-card__button"
+                            onClick={() => onSelectProduct(product)}
+                        >
+                            Voir le produit
+                        </button>
+                    </article>
                 ))}
             </div>
         );

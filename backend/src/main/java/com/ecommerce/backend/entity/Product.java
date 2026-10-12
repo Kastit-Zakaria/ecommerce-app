@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.math.BigDecimal;
 
@@ -44,4 +46,13 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "type_id")
     private ProductType type;
+
+    @ManyToMany
+    @JoinTable(
+            name = "product_sizes",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "size_id")
+    )
+    @OrderBy("sortOrder ASC")
+    private List<Size> sizes = new ArrayList<>();
 }
