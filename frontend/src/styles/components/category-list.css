@@ -1,12 +1,11 @@
+/* Catégories dans le header noir */
 .category-list {
-    height: var(--categories-height);
-    box-sizing: border-box;
     display: flex;
-    justify-content: center;
-    gap: 36px;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
+    align-items: stretch;
+    gap: 40px;
+    height: 100%;
     overflow-x: auto;
+    scrollbar-width: none;
 }
 
 .category-list__item {
@@ -14,23 +13,24 @@
     box-sizing: border-box;
     background: none;
     border: none;
-    border-bottom: 2px solid transparent;
-    padding: 0 4px;
+    padding: 0;
     font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.16em;
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: 0;
     text-transform: uppercase;
-    color: var(--color-text);
+    color: var(--color-header-link);
     white-space: nowrap;
     cursor: pointer;
+    transition: color 0.15s;
 }
 
 .category-list__item:hover {
-    border-bottom-color: #bbbbbb;
+    color: var(--color-header-active);
 }
 
+/* Catégorie sélectionnée : blanche et en gras */
 .category-list__item--active {
-    border-bottom-color: var(--color-text);
+    color: var(--color-header-active);
     font-weight: 600;
 }

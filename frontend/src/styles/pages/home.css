@@ -1,0 +1,5 @@
+/* Quand on défile jusqu'aux produits, on laisse la place
+   à la navigation collée en haut (le bandeau, lui, a disparu) */
+#produits {
+    scroll-margin-top: var(--header-main-height);
+}

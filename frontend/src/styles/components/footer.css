@@ -172,10 +172,12 @@
     padding-bottom: 32px;
 }
 
+/* Logo manuscrit, en noir sur le fond clair du footer */
 .footer__logo {
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 0.32em;
+    font-family: var(--font-logo);
+    font-size: 36px;
+    line-height: 1;
+    color: var(--color-text);
 }
 
 .footer__legal {

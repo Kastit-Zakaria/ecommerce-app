@@ -1,18 +1,18 @@
-import { useState, useRef } from 'react';
-import CategoryList from '../components/CategoryList';
+import { useState, useRef, useEffect } from 'react';
 import HeroVideo from '../components/HeroVideo';
 import ProductList from '../components/ProductList';
 import ProductModal from '../components/ProductModal';
 
-const Home = () => {
-    const [selectedCategory, setSelectedCategory] = useState(null);
+const Home = ({ selectedCategory }) => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const productsRef = useRef(null);
 
-    const handleSelectCategory = (category) => {
-        setSelectedCategory(category);
-        productsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
+    // Quand une catégorie est choisie (dans le header), on descend jusqu'aux produits
+    useEffect(() => {
+        if (selectedCategory !== null) {
+            productsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [selectedCategory]);
 
     let modal = null;
     if (selectedProduct !== null) {
@@ -26,11 +26,6 @@ const Home = () => {
 
     return (
         <div className="home-page">
-            <CategoryList
-                selectedCategory={selectedCategory}
-                onSelect={handleSelectCategory}
-            />
-
             <HeroVideo />
 
             <div id="produits" ref={productsRef}>

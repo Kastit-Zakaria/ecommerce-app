@@ -1,7 +1,7 @@
-/* Hauteur = écran - (bandeau + header + catégories) */
+/* Hauteur = écran - (bandeau + header) */
 .hero-video {
     position: relative;
-    height: calc(100vh - var(--announcement-height) - var(--header-main-height) - var(--categories-height));
+    height: calc(100vh - var(--announcement-height) - var(--header-main-height));
     min-height: 420px;
     overflow: hidden;
     display: flex;

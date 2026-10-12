@@ -90,13 +90,13 @@ const Footer = () => {
             {/* 3. Barre finale */}
             <div className="footer__bottom">
                 <div className="footer__container footer__bottom-inner">
-                    <span className="footer__logo">VESTIA</span>
+                    <span className="footer__logo">Sera</span>
                     <nav className="footer__legal" aria-label="Mentions légales">
                         <a href="#" className="footer__legal-link">Conditions générales de vente</a>
                         <a href="#" className="footer__legal-link">Confidentialité</a>
                         <a href="#" className="footer__legal-link">Cookies</a>
                     </nav>
-                    <span className="footer__copyright">Belgique · FR — © {currentYear} VESTIA</span>
+                    <span className="footer__copyright">Belgique · FR — © {currentYear} SERA</span>
                 </div>
             </div>
 

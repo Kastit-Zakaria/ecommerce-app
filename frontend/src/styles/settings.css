@@ -4,10 +4,26 @@
     --color-border: #e6e6e6;
     --color-bg: #ffffff;
 
+    /* Couleurs du header */
+    --color-header-bg: #000000;
+    --color-header-link: #9a9a9a;
+    --color-header-active: #ffffff;
+    --color-logo: #e50010;
+
+    /* Polices */
+    --font-logo: 'Mr Dafoe', cursive;
+    --font-body: 'Jost', sans-serif;
+
     /* Hauteurs du haut de page (utilisées pour calculer la taille de la vidéo) */
     --announcement-height: 36px;
-    --header-main-height: 64px;
-    --categories-height: 48px;
+    --header-main-height: 56px;
+}
+
+/* Sur écran étroit, les catégories passent sur une 2e ligne dans le header */
+@media (max-width: 900px) {
+    :root {
+        --header-main-height: 100px;
+    }
 }
 
 html {
@@ -17,5 +33,5 @@ html {
 body {
     background: var(--color-bg);
     color: var(--color-text);
-    font-family: 'Jost', sans-serif;
+    font-family: var(--font-body);
 }

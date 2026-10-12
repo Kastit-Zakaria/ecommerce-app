@@ -1,9 +1,5 @@
-.header {
-    background: var(--color-bg);
-}
-
-/* Bandeau d'annonce : hauteur fixe */
-.header__announcement {
+/* Bandeau d'annonce : hors du header, il défile avec la page */
+.announcement {
     height: var(--announcement-height);
     display: flex;
     align-items: center;
@@ -11,98 +7,93 @@
     padding: 0 16px;
     overflow: hidden;
     white-space: nowrap;
-    background: var(--color-text);
-    color: #ffffff;
+    background: #f4f4f2;
+    color: var(--color-text);
     font-size: 12px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
+    font-weight: bold;
 }
 
-/* Ligne principale : hauteur fixe, 3 colonnes, logo au centre */
+/* Navigation : collée tout en haut de l'écran */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--color-header-bg);
+}
+
+/* Ligne principale : toute la largeur de l'écran */
 .header__main {
     height: var(--header-main-height);
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "logo categories actions";
     align-items: center;
-    gap: 16px;
-    max-width: 1360px;
-    margin: 0 auto;
-    padding: 0 24px;
+    column-gap: 80px;
+    padding: 0 26px;
 }
 
-/* Liens à gauche */
-.header__nav {
-    display: flex;
-    gap: 20px;
-}
-
-.header__link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    border-bottom: 1px solid transparent;
-    color: var(--color-text);
-    font-size: 13px;
-    letter-spacing: 0.06em;
-    text-decoration: none;
-}
-
-.header__link:hover {
-    border-bottom-color: #bbbbbb;
-}
-
-/* Classe ajoutée automatiquement par NavLink */
-.header__link.active {
-    border-bottom-color: var(--color-text);
-}
-
-/* Logo au centre */
+/* Logo manuscrit à gauche */
 .header__logo {
-    padding-left: 0.32em;
-    color: var(--color-text);
-    font-size: 30px;
-    font-weight: 600;
-    letter-spacing: 0.32em;
+    grid-area: logo;
+    color: var(--color-logo);
+    font-family: var(--font-logo);
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 1;
     text-decoration: none;
 }
 
-/* Actions à droite */
+/* Catégories au milieu */
+.header__categories {
+    grid-area: categories;
+    height: 100%;
+    min-width: 0;
+}
+
+/* Icônes à droite */
 .header__actions {
+    grid-area: actions;
     display: flex;
     justify-content: flex-end;
-    gap: 20px;
+    gap: 16px;
 }
 
 .header__action {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 6px;
-    min-height: 44px;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
     padding: 0;
     border: none;
     background: none;
-    color: var(--color-text);
-    font-family: inherit;
-    font-size: 13px;
-    letter-spacing: 0.06em;
+    color: #ffffff;
     cursor: pointer;
+    transition: opacity 0.15s;
 }
 
 .header__action:hover {
-    color: var(--color-muted);
+    opacity: 0.7;
 }
 
-/* Sur téléphone : on garde seulement les icônes */
-@media (max-width: 720px) {
-    .header__action-label {
-        display: none;
+/* Écran étroit : logo + icônes sur la 1re ligne, catégories sur la 2e */
+@media (max-width: 900px) {
+    .header__main {
+        grid-template-columns: 1fr auto;
+        grid-template-rows: 56px 44px;
+        grid-template-areas:
+      "logo actions"
+      "categories categories";
+        padding: 0 16px;
     }
 
-    .header__nav {
-        gap: 12px;
+    .header__categories {
+        border-top: 1px solid #222222;
     }
 
-    .header__logo {
-        font-size: 22px;
+    .header__actions {
+        gap: 4px;
     }
 }
