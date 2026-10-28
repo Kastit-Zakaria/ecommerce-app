@@ -1,3 +1,7 @@
+// EditorialBanner : bannière éditoriale de la collection du moment
+// Reçoit : rien
+// Renvoie : le JSX de la bannière
+// Pourquoi : mettre en avant la collection d'automne en bas de l'accueil
 const EditorialBanner = () => {
     return (
         <section className="editorial" aria-label="Collection du moment">

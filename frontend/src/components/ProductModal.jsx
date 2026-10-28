@@ -1,84 +1,92 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
-import formatPrice from '../utils/formatPrice';
+import objApi from '../services/api';
+import fFormatPrice from '../utils/formatPrice';
 
-const ProductModal = ({ productId, onClose }) => {
-    const [product, setProduct] = useState(null);
-    const [selectedSize, setSelectedSize] = useState(null);
+// ProductModal : fenêtre de détail d'un produit (image, marque, prix, tailles, stock)
+// Reçoit : intProductId (identifiant du produit à charger), fOnClose (fonction pour fermer le modal)
+// Renvoie : le JSX du modal
+// Pourquoi : montrer la fiche complète d'un produit sans quitter l'accueil
+const ProductModal = ({ intProductId, fOnClose }) => {
+    const [objProduct, fSetObjProduct] = useState(null);
+    const [intSelectedSize, fSetIntSelectedSize] = useState(null);
 
     // 1. Charger le produit depuis l'API
     useEffect(() => {
-        api.get(`/products/${productId}`)
-            .then((response) => {
-                setProduct(response.data);
+        objApi.get(`/products/${intProductId}`)
+            .then((objResponse) => {
+                fSetObjProduct(objResponse.data);
             })
-            .catch((error) => {
-                console.error('Erreur lors du chargement du produit :', error);
+            .catch((objError) => {
+                console.error('Erreur lors du chargement du produit :', objError);
             });
-    }, [productId]);
+    }, [intProductId]);
 
     // 2. Fermer avec la touche Échap + bloquer le défilement de la page
     useEffect(() => {
-        const handleKeyDown = (event) => {
-            if (event.key === 'Escape') {
-                onClose();
+        // fHandleKeyDown : ferme le modal quand on appuie sur Échap
+        // Reçoit : objEvent (l'événement clavier)
+        // Renvoie : rien
+        // Pourquoi : permettre de fermer le modal au clavier
+        const fHandleKeyDown = (objEvent) => {
+            if (objEvent.key === 'Escape') {
+                fOnClose();
             }
         };
 
-        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keydown', fHandleKeyDown);
         document.body.style.overflow = 'hidden';
 
         // Nettoyage : exécuté à la fermeture du modal
         return () => {
-            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keydown', fHandleKeyDown);
             document.body.style.overflow = '';
         };
-    }, [onClose]);
+    }, [fOnClose]);
 
     // 3. Choisir ce qu'on affiche
-    let content;
-    if (product === null) {
-        content = <p className="product-modal__loading">Chargement…</p>;
+    let objContent;
+    if (objProduct === null) {
+        objContent = <p className="product-modal__loading">Chargement…</p>;
     } else {
-        let stockLabel = 'En stock';
-        if (product.stock === 0) {
-            stockLabel = 'Rupture de stock';
+        let strStockLabel = 'En stock';
+        if (objProduct.stock === 0) {
+            strStockLabel = 'Rupture de stock';
         }
 
-        content = (
+        objContent = (
             <div className="product-modal__body">
-                <img className="product-modal__image" src={product.imageUrl} alt={product.name} />
+                <img className="product-modal__image" src={objProduct.imageUrl} alt={objProduct.name} />
 
                 <div className="product-modal__info">
-                    <p className="product-modal__brand">{product.brand.name}</p>
-                    <h2 className="product-modal__name" id="product-modal-title">{product.name}</h2>
-                    <p className="product-modal__price">{formatPrice(product.price)}</p>
-                    <p className="product-modal__description">{product.description}</p>
+                    <p className="product-modal__brand">{objProduct.brand.name}</p>
+                    <h2 className="product-modal__name" id="product-modal-title">{objProduct.name}</h2>
+                    <p className="product-modal__price">{fFormatPrice(objProduct.price)}</p>
+                    <p className="product-modal__description">{objProduct.description}</p>
 
                     <div>
                         <p className="product-modal__label">Taille</p>
                         <div className="product-modal__sizes">
-                            {product.sizes.map((size) => {
-                                let className = 'product-modal__size';
-                                if (selectedSize === size.id) {
-                                    className = 'product-modal__size product-modal__size--active';
+                            {objProduct.sizes.map((objSize) => {
+                                let strClassName = 'product-modal__size';
+                                if (intSelectedSize === objSize.id) {
+                                    strClassName = 'product-modal__size product-modal__size--active';
                                 }
 
                                 return (
                                     <button
-                                        key={size.id}
+                                        key={objSize.id}
                                         type="button"
-                                        className={className}
-                                        onClick={() => setSelectedSize(size.id)}
+                                        className={strClassName}
+                                        onClick={() => fSetIntSelectedSize(objSize.id)}
                                     >
-                                        {size.label}
+                                        {objSize.label}
                                     </button>
                                 );
                             })}
                         </div>
                     </div>
 
-                    <p className="product-modal__stock">{stockLabel}</p>
+                    <p className="product-modal__stock">{strStockLabel}</p>
 
                     <button type="button" className="product-modal__add" disabled>
                         Ajouter au panier
@@ -91,7 +99,7 @@ const ProductModal = ({ productId, onClose }) => {
     // 4. Structure du modal : fond sombre + fenêtre
     return (
         <div className="product-modal">
-            <div className="product-modal__backdrop" onClick={onClose}></div>
+            <div className="product-modal__backdrop" onClick={fOnClose}></div>
 
             <div
                 className="product-modal__dialog"
@@ -99,10 +107,10 @@ const ProductModal = ({ productId, onClose }) => {
                 aria-modal="true"
                 aria-labelledby="product-modal-title"
             >
-                <button type="button" className="product-modal__close" onClick={onClose} aria-label="Fermer">
+                <button type="button" className="product-modal__close" onClick={fOnClose} aria-label="Fermer">
                     ✕
                 </button>
-                {content}
+                {objContent}
             </div>
         </div>
     );

@@ -5,22 +5,26 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
 
+// App : composant racine, il porte la catégorie choisie et déclare les routes
+// Reçoit : rien
+// Renvoie : le JSX de toute l'application
+// Pourquoi : partager la catégorie sélectionnée entre l'en-tête et la page d'accueil
 const App = () => {
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [objSelectedCategory, fSetObjSelectedCategory] = useState(null);
 
     return (
         <BrowserRouter>
             <Header
-                selectedCategory={selectedCategory}
-                onSelectCategory={setSelectedCategory}
+                objSelectedCategory={objSelectedCategory}
+                fOnSelectCategory={fSetObjSelectedCategory}
             />
             <Routes>
                 <Route
                     path="/"
                     element={
                         <Home
-                            selectedCategory={selectedCategory}
-                            onSelectCategory={setSelectedCategory}
+                            objSelectedCategory={objSelectedCategory}
+                            fOnSelectCategory={fSetObjSelectedCategory}
                         />
                     }
                 />

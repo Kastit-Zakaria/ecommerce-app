@@ -13,19 +13,31 @@ import java.util.List;
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final ProductService productService;
+    private final ProductService objProductService;
 
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    // ProductController : constructeur (nom imposé par Java), Spring injecte le service
+    // Reçoit : objProductService
+    // Renvoie : rien
+    // Pourquoi : donner au contrôleur accès aux produits
+    public ProductController(ProductService objProductService) {
+        this.objProductService = objProductService;
     }
 
+    // fGetLatest : liste les derniers produits ajoutés (GET /api/products/latest)
+    // Reçoit : rien
+    // Renvoie : la liste des derniers arrivages
+    // Pourquoi : remplir la section « Derniers arrivages » de l'accueil
     @GetMapping("/latest")
-    public List<Product> getLatest() {
-        return productService.getLatestProducts();
+    public List<Product> fGetLatest() {
+        return objProductService.fGetLatestProducts();
     }
 
+    // fGetById : renvoie un produit (GET /api/products/{id})
+    // Reçoit : intId, l'identifiant du produit
+    // Renvoie : le produit demandé
+    // Pourquoi : afficher la fiche détaillée dans le modal
     @GetMapping("/{id}")
-    public Product getById(@PathVariable Long id) {
-        return productService.getProductById(id);
+    public Product fGetById(@PathVariable("id") Long intId) {
+        return objProductService.fGetProductById(intId);
     }
 }

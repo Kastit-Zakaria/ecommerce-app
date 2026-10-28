@@ -1,18 +1,28 @@
 import { Link, useNavigate } from 'react-router-dom';
 import CategoryList from './CategoryList';
 
-const Header = ({ selectedCategory, onSelectCategory }) => {
-    const navigate = useNavigate();
+// Header : bandeau d'annonce + barre de navigation (logo, catégories, actions)
+// Reçoit : objSelectedCategory (catégorie active ou null), fOnSelectCategory (fonction pour la changer)
+// Renvoie : le JSX de l'en-tête
+// Pourquoi : donner un accès permanent aux catégories et au retour à l'accueil
+const Header = ({ objSelectedCategory, fOnSelectCategory }) => {
+    const fNavigate = useNavigate();
 
-    // Clic sur une catégorie : on la sélectionne et on va sur l'accueil
-    const handleSelectCategory = (category) => {
-        onSelectCategory(category);
-        navigate('/');
+    // fHandleSelectCategory : sélectionne une catégorie et va sur l'accueil
+    // Reçoit : objCategory (la catégorie cliquée)
+    // Renvoie : rien
+    // Pourquoi : voir les produits de la catégorie depuis n'importe quelle page
+    const fHandleSelectCategory = (objCategory) => {
+        fOnSelectCategory(objCategory);
+        fNavigate('/');
     };
 
-    // Clic sur le logo : on remet l'accueil à zéro et on remonte en haut
-    const handleLogoClick = () => {
-        onSelectCategory(null);
+    // fHandleLogoClick : remet l'accueil à zéro et remonte en haut de la page
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : le clic sur le logo ramène à l'état initial du site
+    const fHandleLogoClick = () => {
+        fOnSelectCategory(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -26,12 +36,12 @@ const Header = ({ selectedCategory, onSelectCategory }) => {
             {/* Navigation : reste collée en haut de l'écran */}
             <header className="header">
                 <div className="header__main">
-                    <Link to="/" className="header__logo" onClick={handleLogoClick}>Sera</Link>
+                    <Link to="/" className="header__logo" onClick={fHandleLogoClick}>Sera</Link>
 
                     <div className="header__categories">
                         <CategoryList
-                            selectedCategory={selectedCategory}
-                            onSelect={handleSelectCategory}
+                            objSelectedCategory={objSelectedCategory}
+                            fOnSelect={fHandleSelectCategory}
                         />
                     </div>
 

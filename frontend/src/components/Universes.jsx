@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
+import objApi from '../services/api';
 
-const Universes = ({ onSelectCategory }) => {
-    const [categories, setCategories] = useState([]);
+// Universes : grille « Nos univers », une carte image par catégorie
+// Reçoit : fOnSelectCategory (fonction appelée au clic avec la catégorie)
+// Renvoie : le JSX de la section
+// Pourquoi : offrir un second accès visuel aux catégories depuis l'accueil
+const Universes = ({ fOnSelectCategory }) => {
+    const [tbCategories, fSetTbCategories] = useState([]);
 
     useEffect(() => {
-        api.get('/categories')
-            .then((response) => {
-                setCategories(response.data);
+        objApi.get('/categories')
+            .then((objResponse) => {
+                fSetTbCategories(objResponse.data);
             })
-            .catch((error) => {
-                console.error('Erreur lors du chargement des univers :', error);
+            .catch((objError) => {
+                console.error('Erreur lors du chargement des univers :', objError);
             });
     }, []);
 
     // On garde seulement les catégories qui ont une image
-    const universes = categories.filter((category) => {
-        return category.imageUrl !== null;
+    const tbUniverses = tbCategories.filter((objCategory) => {
+        return objCategory.imageUrl !== null;
     });
 
     return (
@@ -24,16 +28,16 @@ const Universes = ({ onSelectCategory }) => {
             <h2 className="universes__title">Nos univers</h2>
 
             <div className="universes__grid">
-                {universes.map((category) => (
+                {tbUniverses.map((objCategory) => (
                     <button
-                        key={category.id}
+                        key={objCategory.id}
                         type="button"
                         className="universe-card"
-                        onClick={() => onSelectCategory(category)}
+                        onClick={() => fOnSelectCategory(objCategory)}
                     >
-                        <img src={category.imageUrl} alt="" className="universe-card__image" />
+                        <img src={objCategory.imageUrl} alt="" className="universe-card__image" />
                         <span className="universe-card__label">
-                            <span className="universe-card__name">{category.name}</span>
+                            <span className="universe-card__name">{objCategory.name}</span>
                             <span className="universe-card__link">Voir la collection</span>
                         </span>
                     </button>
