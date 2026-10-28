@@ -30,6 +30,61 @@ Les colonnes « Résultat obtenu » et « Statut » (OK / KO) sont à remplir lo
 | TF-US3-03 | US3 | 1. Ouvrir la fiche d'un produit. 2. Observer l'onglet du navigateur. | La page ne se recharge pas et l'URL ne change pas. | | |
 | TF-US3-04 | US3 | 1. Ouvrir la fiche d'un produit. 2. Cliquer sur ✕ (ou en dehors de la fenêtre). | Le modal se ferme et on retrouve la liste des produits au même endroit. | | |
 
+## Obligations légales — pages légales
+
+| ID | US | Étapes | Résultat attendu | Résultat obtenu | Statut |
+|----|----|--------|------------------|-----------------|--------|
+| TL-01 | Légal | 1. En bas de page, cliquer sur « Mentions légales ». | La page /mentions-legales s'affiche sans rechargement : éditeur, adresse, e-mail, numéro d'entreprise, hébergeur. | | |
+| TL-02 | Légal | 1. Cliquer sur « Conditions générales de vente ». | La page /cgv s'affiche sans rechargement : prix TTC en euros, commande, paiement, livraison, rétractation 14 jours, garantie légale 2 ans, retours, litiges. | | |
+| TL-03 | Légal | 1. Cliquer sur « Confidentialité ». | La page /confidentialite s'affiche sans rechargement : responsable, données, finalité, base légale, durée, droits, contact, plainte auprès de l'APD. | | |
+| TL-04 | Légal | 1. Cliquer sur « Cookies ». | La page /cookies s'affiche sans rechargement et décrit le stockage utilisé (sera-cookie-consent) et son rôle. | | |
+| TL-05 | Légal | 1. Ouvrir chaque page légale. 2. Comparer avec le reste du site (polices, couleurs, espacements). | Le style est cohérent avec le reste du site. La date de dernière mise à jour est visible sous le titre. | | |
+| TL-06 | Légal | 1. Depuis une page légale, cliquer sur les liens internes (ex. « politique cookies »). 2. Utiliser le bouton Précédent du navigateur. | La navigation se fait sans rechargement et le retour arrière fonctionne. | | |
+| TL-07 | Légal | 1. Comparer l'éditeur (nom, adresse, e-mail, téléphone, BCE, TVA) entre les mentions légales, les CGV, la confidentialité, la page cookies et le footer. | Les informations sont identiques partout. Aucune information manquante ou provisoire n'est visible. | | |
+
+## Navigation — retour en haut de page
+
+| ID | US | Étapes | Résultat attendu | Résultat obtenu | Statut |
+|----|----|--------|------------------|-----------------|--------|
+| TS-01 | Navigation | 1. Descendre tout en bas de l'accueil. 2. Cliquer sur « Mentions légales » dans le footer. | La page s'affiche en haut, sans rechargement ni défilement visible. | | |
+| TS-02 | Navigation | 1. Répéter avec « Conditions générales de vente », « Confidentialité », « Cookies » puis « Qui sommes-nous ». | Chaque page s'affiche en haut. | | |
+| TS-03 | Navigation | 1. Ouvrir « Mentions légales » et descendre. 2. Cliquer sur une catégorie dans l'en-tête. | On revient à l'accueil puis la page descend jusqu'à la liste des produits de la catégorie (pas en haut). | | |
+| TS-04 | Navigation | 1. Sur l'accueil, cliquer sur une catégorie. | La page descend jusqu'aux produits (comportement inchangé). | | |
+| TS-05 | Navigation | 1. Ouvrir l'adresse `/#produits` dans le navigateur (ou depuis un lien interne). | La page n'est pas forcée en haut. | | |
+| TS-06 | Navigation | 1. Ouvrir une page légale puis cliquer sur Précédent. | La navigation fonctionne sans rechargement et la page affichée est en haut. | | |
+
+## Obligations légales — bandeau de consentement aux cookies
+
+| ID | US | Étapes | Résultat attendu | Résultat obtenu | Statut |
+|----|----|--------|------------------|-----------------|--------|
+| TC-01 | RGPD | 1. Vider les données du site (F12 → Application → Local Storage). 2. Recharger la page d'accueil. | Le bandeau s'affiche avec « Accepter », « Refuser » (même style) et un lien « En savoir plus » vers /cookies. | | |
+| TC-02 | RGPD | 1. Cliquer sur « Accepter ». 2. Recharger la page. | Le bandeau disparaît et ne réapparaît pas. `sera-cookie-consent` = `accepted` dans le Local Storage. | | |
+| TC-03 | RGPD | 1. Vider le Local Storage. 2. Cliquer sur « Refuser ». 3. Recharger la page. | Le bandeau disparaît et ne réapparaît pas. `sera-cookie-consent` = `refused`. | | |
+| TC-04 | RGPD | 1. Avec un choix déjà fait, cliquer sur « Gérer les cookies » dans le footer. | Le bandeau réapparaît, sans rechargement de la page. | | |
+| TC-05 | RGPD | 1. Réafficher le bandeau. 2. Changer de choix (Accepter → Refuser). | Le nouveau choix remplace l'ancien dans le Local Storage. | | |
+| TC-06 | RGPD | 1. Vider le Local Storage. 2. Ouvrir l'onglet Réseau (F12), recharger la page avant tout choix. | Aucune requête vers un cookie tiers ni vers un service externe de suivi. | | |
+
+## Obligations légales — newsletter
+
+Prérequis : script `database/newsletter.sql` exécuté dans phpMyAdmin.
+
+| ID | US | Étapes | Résultat attendu | Résultat obtenu | Statut |
+|----|----|--------|------------------|-----------------|--------|
+| TN-01 | RGPD | 1. Aller au formulaire de newsletter du footer. | La case de consentement est visible, **non cochée**, avec un lien vers /confidentialite. | | |
+| TN-02 | RGPD | 1. Saisir un e-mail valide. 2. Ne pas cocher la case. 3. Cliquer sur « S'inscrire ». | Aucune inscription ; message d'erreur demandant de cocher la case. | | |
+| TN-03 | RGPD | 1. Saisir un e-mail valide. 2. Cocher la case. 3. Cliquer sur « S'inscrire ». | Message de succès, champs réinitialisés, pas de rechargement. Ligne créée dans `newsletter_subscribers` avec `consent_date`. | | |
+| TN-04 | RGPD | 1. Saisir l'e-mail déjà inscrit (même en majuscules). 2. Cocher la case. 3. Valider. | Message clair « Cette adresse e-mail est déjà inscrite. » ; aucun doublon en base. | | |
+| TN-05 | RGPD | 1. Saisir un texte sans @ (ex. « abc »). 2. Cocher la case. 3. Valider. | Le navigateur ou le serveur refuse la saisie avec un message ; aucune inscription. | | |
+| TN-06 | RGPD | 1. Arrêter le back. 2. Tenter une inscription valide. | Message d'erreur générique, sans plantage de la page. | | |
+| TN-07 | RGPD | 1. Cliquer sur le lien « politique de confidentialité » de la case de consentement. | La page /confidentialite s'affiche. | | |
+
+## Obligations légales — polices locales
+
+| ID | US | Étapes | Résultat attendu | Résultat obtenu | Statut |
+|----|----|--------|------------------|-----------------|--------|
+| TP-01 | RGPD | 1. Ouvrir F12 → Réseau, recharger la page. 2. Filtrer sur « fonts ». | Aucune requête vers fonts.googleapis.com ni fonts.gstatic.com ; les polices viennent du site (fichiers .woff2 locaux). | | |
+| TP-02 | RGPD | 1. Comparer le logo « Sera » (Mr Dafoe) et les textes (Jost) avec la version précédente. | L'apparence est identique. | | |
+
 ## Tests d'accessibilité
 
 | ID | US | Étapes | Résultat attendu | Résultat obtenu | Statut |

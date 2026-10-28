@@ -97,6 +97,46 @@
     color: var(--color-muted);
 }
 
+/* Consentement newsletter (case non pré-cochée) */
+.footer__consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.footer__checkbox {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--color-text);
+}
+
+.footer__consent-label {
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.footer__consent-link {
+    color: var(--color-text);
+    text-decoration: underline;
+}
+
+.footer__message {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-text);
+}
+
+.footer__message--error {
+    color: #b00020;
+}
+
+.footer__submit:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
 /* ===== 2. Colonnes de liens ===== */
 .footer__columns {
     display: grid;
@@ -157,6 +197,19 @@
     color: var(--color-muted);
 }
 
+/* Identité de la société (au-dessus de la barre finale) */
+.footer__company {
+    margin: 0;
+    padding-bottom: 24px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--color-muted);
+}
+
+.footer__company-link {
+    color: var(--color-muted);
+}
+
 /* ===== 3. Barre finale ===== */
 .footer__bottom {
     border-top: 1px solid #dededa;
@@ -194,5 +247,20 @@
 }
 
 .footer__legal-link:hover {
+    text-decoration: underline;
+}
+
+/* Bouton « Gérer les cookies » : même apparence que les liens voisins */
+.footer__legal-button {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-muted);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.footer__legal-button:hover {
     text-decoration: underline;
 }
