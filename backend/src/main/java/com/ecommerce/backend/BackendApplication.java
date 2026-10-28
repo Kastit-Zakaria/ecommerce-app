@@ -6,8 +6,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class BackendApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(BackendApplication.class, args);
+    // main : point d'entrée de l'application (le nom est imposé par Java)
+    // Reçoit : tbArgs, les arguments de la ligne de commande
+    // Renvoie : rien
+    // Pourquoi : démarrer le serveur Spring Boot
+    public static void main(String[] tbArgs) {
+        SpringApplication.run(BackendApplication.class, tbArgs);
     }
 
 }

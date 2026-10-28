@@ -12,27 +12,43 @@ import java.util.Optional;
 @Service
 public class ProductService {
 
-    private final ProductRepository productRepository;
+    private final ProductRepository objProductRepository;
 
-    public ProductService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    // ProductService : constructeur (nom imposé par Java), Spring injecte le repository
+    // Reçoit : objProductRepository
+    // Renvoie : rien
+    // Pourquoi : donner au service accès à la table des produits
+    public ProductService(ProductRepository objProductRepository) {
+        this.objProductRepository = objProductRepository;
     }
 
-    public List<Product> getProductsByCategory(Long categoryId) {
-        return productRepository.findByCategoryId(categoryId);
+    // fGetProductsByCategory : récupère les produits d'une catégorie
+    // Reçoit : intCategoryId, l'identifiant de la catégorie
+    // Renvoie : la liste des produits de cette catégorie
+    // Pourquoi : afficher les produits de la catégorie choisie
+    public List<Product> fGetProductsByCategory(Long intCategoryId) {
+        return objProductRepository.findByCategoryId(intCategoryId);
     }
 
-    public Product getProductById(Long id) {
-        Optional<Product> result = productRepository.findById(id);
+    // fGetProductById : récupère un produit par son identifiant
+    // Reçoit : intId, l'identifiant du produit
+    // Renvoie : le produit, ou une erreur 404 « Produit introuvable » s'il n'existe pas
+    // Pourquoi : alimenter la fiche détaillée tout en signalant clairement un identifiant inconnu
+    public Product fGetProductById(Long intId) {
+        Optional<Product> objResult = objProductRepository.findById(intId);
 
-        if (result.isEmpty()) {
+        if (objResult.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit introuvable");
         }
 
-        return result.get();
+        return objResult.get();
     }
 
-    public List<Product> getLatestProducts() {
-        return productRepository.findTop8ByOrderByIdDesc();
+    // fGetLatestProducts : récupère les 8 derniers produits ajoutés
+    // Reçoit : rien
+    // Renvoie : la liste des derniers produits
+    // Pourquoi : remplir la section « Derniers arrivages » de l'accueil
+    public List<Product> fGetLatestProducts() {
+        return objProductRepository.findTop8ByOrderByIdDesc();
     }
 }

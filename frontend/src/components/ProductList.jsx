@@ -1,95 +1,99 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
-import formatPrice from '../utils/formatPrice';
+import objApi from '../services/api';
+import fFormatPrice from '../utils/formatPrice';
 
-const ProductList = ({ category, onSelectProduct }) => {
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [selectedTypeId, setSelectedTypeId] = useState(null);
+// ProductList : liste des produits (derniers arrivages ou catégorie) avec filtre par type
+// Reçoit : objCategory (catégorie choisie ou null), fOnSelectProduct (fonction appelée avec le produit cliqué)
+// Renvoie : le JSX de la section produits
+// Pourquoi : montrer les produits et laisser l'utilisateur ouvrir la fiche d'un produit
+const ProductList = ({ objCategory, fOnSelectProduct }) => {
+    const [tbProducts, fSetTbProducts] = useState([]);
+    const [blLoading, fSetBlLoading] = useState(false);
+    const [intSelectedTypeId, fSetIntSelectedTypeId] = useState(null);
 
     // 1. Charger les produits : derniers arrivages OU produits de la catégorie
     useEffect(() => {
-        let url = '/products/latest';
-        if (category !== null) {
-            url = `/categories/${category.id}/products`;
+        let strUrl = '/products/latest';
+        if (objCategory !== null) {
+            strUrl = `/categories/${objCategory.id}/products`;
         }
 
-        setLoading(true);
-        setSelectedTypeId(null);
-        api.get(url)
-            .then((response) => {
-                setProducts(response.data);
-                setLoading(false);
+        fSetBlLoading(true);
+        fSetIntSelectedTypeId(null);
+        objApi.get(strUrl)
+            .then((objResponse) => {
+                fSetTbProducts(objResponse.data);
+                fSetBlLoading(false);
             })
-            .catch((error) => {
-                console.error('Erreur lors du chargement des produits :', error);
-                setLoading(false);
+            .catch((objError) => {
+                console.error('Erreur lors du chargement des produits :', objError);
+                fSetBlLoading(false);
             });
-    }, [category]);
+    }, [objCategory]);
 
     // 2. Construire la liste des types présents dans ces produits (sans doublons)
-    const types = [];
-    for (const product of products) {
-        if (product.type !== null) {
-            let alreadyAdded = false;
-            for (const type of types) {
-                if (type.id === product.type.id) {
-                    alreadyAdded = true;
+    const tbTypes = [];
+    for (const objProduct of tbProducts) {
+        if (objProduct.type !== null) {
+            let blAlreadyAdded = false;
+            for (const objType of tbTypes) {
+                if (objType.id === objProduct.type.id) {
+                    blAlreadyAdded = true;
                 }
             }
-            if (!alreadyAdded) {
-                types.push(product.type);
+            if (!blAlreadyAdded) {
+                tbTypes.push(objProduct.type);
             }
         }
     }
-    types.sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+    tbTypes.sort((objTypeA, objTypeB) => objTypeA.name.localeCompare(objTypeB.name, 'fr'));
 
     // 3. Garder seulement les produits du type sélectionné
-    let visibleProducts = products;
-    if (selectedTypeId !== null) {
-        visibleProducts = products.filter((product) => {
-            return product.type !== null && product.type.id === selectedTypeId;
+    let tbVisibleProducts = tbProducts;
+    if (intSelectedTypeId !== null) {
+        tbVisibleProducts = tbProducts.filter((objProduct) => {
+            return objProduct.type !== null && objProduct.type.id === intSelectedTypeId;
         });
     }
 
     // 4. Titre
-    let title = 'Derniers arrivages';
-    if (category !== null) {
-        title = category.name;
+    let strTitle = 'Derniers arrivages';
+    if (objCategory !== null) {
+        strTitle = objCategory.name;
     }
 
     // 5. Filtres par type (seulement pour une catégorie, avec des produits)
-    let filters = null;
-    if (category !== null && !loading && types.length > 0) {
-        let allClassName = 'type-filter__item';
-        if (selectedTypeId === null) {
-            allClassName = 'type-filter__item type-filter__item--active';
+    let objFilters = null;
+    if (objCategory !== null && !blLoading && tbTypes.length > 0) {
+        let strAllClassName = 'type-filter__item';
+        if (intSelectedTypeId === null) {
+            strAllClassName = 'type-filter__item type-filter__item--active';
         }
 
-        filters = (
+        objFilters = (
             <div className="type-filter" role="group" aria-label="Filtrer par type d'article">
                 <button
                     type="button"
-                    className={allClassName}
-                    onClick={() => setSelectedTypeId(null)}
+                    className={strAllClassName}
+                    onClick={() => fSetIntSelectedTypeId(null)}
                 >
                     Tout
                 </button>
 
-                {types.map((type) => {
-                    let className = 'type-filter__item';
-                    if (selectedTypeId === type.id) {
-                        className = 'type-filter__item type-filter__item--active';
+                {tbTypes.map((objType) => {
+                    let strClassName = 'type-filter__item';
+                    if (intSelectedTypeId === objType.id) {
+                        strClassName = 'type-filter__item type-filter__item--active';
                     }
 
                     return (
                         <button
-                            key={type.id}
+                            key={objType.id}
                             type="button"
-                            className={className}
-                            onClick={() => setSelectedTypeId(type.id)}
+                            className={strClassName}
+                            onClick={() => fSetIntSelectedTypeId(objType.id)}
                         >
-                            {type.name}
+                            {objType.name}
                         </button>
                     );
                 })}
@@ -98,25 +102,25 @@ const ProductList = ({ category, onSelectProduct }) => {
     }
 
     // 6. Contenu principal
-    let content;
-    if (loading) {
-        content = <p className="product-list__message">Chargement…</p>;
-    } else if (products.length === 0) {
-        content = <p className="product-list__message">Aucun produit dans cette catégorie.</p>;
+    let objContent;
+    if (blLoading) {
+        objContent = <p className="product-list__message">Chargement…</p>;
+    } else if (tbProducts.length === 0) {
+        objContent = <p className="product-list__message">Aucun produit dans cette catégorie.</p>;
     } else {
-        content = (
+        objContent = (
             <div className="product-list__grid">
-                {visibleProducts.map((product) => (
-                    <article key={product.id} className="product-card">
+                {tbVisibleProducts.map((objProduct) => (
+                    <article key={objProduct.id} className="product-card">
                         <div className="product-card__media">
-                            <img src={product.imageUrl} alt={product.name} className="product-card__image" />
-                            <span className="product-card__tooltip">{product.name}</span>
+                            <img src={objProduct.imageUrl} alt={objProduct.name} className="product-card__image" />
+                            <span className="product-card__tooltip">{objProduct.name}</span>
                         </div>
-                        <p className="product-card__price">{formatPrice(product.price)}</p>
+                        <p className="product-card__price">{fFormatPrice(objProduct.price)}</p>
                         <button
                             type="button"
                             className="product-card__button"
-                            onClick={() => onSelectProduct(product)}
+                            onClick={() => fOnSelectProduct(objProduct)}
                         >
                             Voir le produit
                         </button>
@@ -128,9 +132,9 @@ const ProductList = ({ category, onSelectProduct }) => {
 
     return (
         <section className="product-list">
-            <h2 className="product-list__title">{title}</h2>
-            {filters}
-            {content}
+            <h2 className="product-list__title">{strTitle}</h2>
+            {objFilters}
+            {objContent}
         </section>
     );
 };

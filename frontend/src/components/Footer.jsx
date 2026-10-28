@@ -1,10 +1,18 @@
 import { Link } from 'react-router-dom';
 
+// Footer : pied de page (newsletter, colonnes de liens, réseaux, mentions)
+// Reçoit : rien
+// Renvoie : le JSX du pied de page
+// Pourquoi : offrir la navigation secondaire et l'inscription à la newsletter
 const Footer = () => {
-    const currentYear = new Date().getFullYear();
+    const intCurrentYear = new Date().getFullYear();
 
-    const handleNewsletterSubmit = (event) => {
-        event.preventDefault();
+    // fHandleNewsletterSubmit : bloque l'envoi réel du formulaire newsletter
+    // Reçoit : objEvent (l'événement de soumission)
+    // Renvoie : rien
+    // Pourquoi : éviter le rechargement de la page (l'inscription n'est pas encore branchée)
+    const fHandleNewsletterSubmit = (objEvent) => {
+        objEvent.preventDefault();
     };
 
     return (
@@ -18,7 +26,7 @@ const Footer = () => {
                         <h2 className="footer__newsletter-title">Les nouveautés en avant-première</h2>
                     </div>
 
-                    <form className="footer__form" onSubmit={handleNewsletterSubmit}>
+                    <form className="footer__form" onSubmit={fHandleNewsletterSubmit}>
                         <label htmlFor="newsletter-email" className="footer__label">Adresse e-mail</label>
                         <div className="footer__form-row">
                             <input
@@ -96,7 +104,7 @@ const Footer = () => {
                         <a href="#" className="footer__legal-link">Confidentialité</a>
                         <a href="#" className="footer__legal-link">Cookies</a>
                     </nav>
-                    <span className="footer__copyright">Belgique · FR — © {currentYear} SERA</span>
+                    <span className="footer__copyright">Belgique · FR — © {intCurrentYear} SERA</span>
                 </div>
             </div>
 

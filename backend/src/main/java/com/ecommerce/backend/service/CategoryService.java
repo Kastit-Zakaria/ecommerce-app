@@ -9,13 +9,21 @@ import java.util.List;
 @Service
 public class CategoryService {
 
-    private final CategoryRepository categoryRepository;
+    private final CategoryRepository objCategoryRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
+    // CategoryService : constructeur (nom imposé par Java), Spring injecte le repository
+    // Reçoit : objCategoryRepository
+    // Renvoie : rien
+    // Pourquoi : donner au service accès à la table des catégories
+    public CategoryService(CategoryRepository objCategoryRepository) {
+        this.objCategoryRepository = objCategoryRepository;
     }
 
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    // fGetAllCategories : récupère toutes les catégories
+    // Reçoit : rien
+    // Renvoie : la liste des catégories
+    // Pourquoi : isoler l'accès aux données du contrôleur
+    public List<Category> fGetAllCategories() {
+        return objCategoryRepository.findAll();
     }
 }

@@ -1,34 +1,38 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
+import objApi from '../services/api';
 
-const CategoryList = ({ selectedCategory, onSelect }) => {
-    const [categories, setCategories] = useState([]);
+// CategoryList : barre de navigation listant les catégories
+// Reçoit : objSelectedCategory (catégorie active ou null), fOnSelect (fonction appelée au clic avec la catégorie)
+// Renvoie : le JSX de la navigation
+// Pourquoi : permettre de choisir la catégorie dont on veut voir les produits
+const CategoryList = ({ objSelectedCategory, fOnSelect }) => {
+    const [tbCategories, fSetTbCategories] = useState([]);
 
     useEffect(() => {
-        api.get('/categories')
-            .then((response) => {
-                setCategories(response.data);
+        objApi.get('/categories')
+            .then((objResponse) => {
+                fSetTbCategories(objResponse.data);
             })
-            .catch((error) => {
-                console.error('Erreur lors du chargement des catégories :', error);
+            .catch((objError) => {
+                console.error('Erreur lors du chargement des catégories :', objError);
             });
     }, []);
 
     return (
         <nav className="category-list">
-            {categories.map((category) => {
-                let className = 'category-list__item';
-                if (selectedCategory !== null && selectedCategory.id === category.id) {
-                    className = 'category-list__item category-list__item--active';
+            {tbCategories.map((objCategory) => {
+                let strClassName = 'category-list__item';
+                if (objSelectedCategory !== null && objSelectedCategory.id === objCategory.id) {
+                    strClassName = 'category-list__item category-list__item--active';
                 }
 
                 return (
                     <button
-                        key={category.id}
-                        className={className}
-                        onClick={() => onSelect(category)}
+                        key={objCategory.id}
+                        className={strClassName}
+                        onClick={() => fOnSelect(objCategory)}
                     >
-                        {category.name}
+                        {objCategory.name}
                     </button>
                 );
             })}

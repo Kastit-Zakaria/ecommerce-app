@@ -15,21 +15,33 @@ import java.util.List;
 @RequestMapping("/api/categories")
 public class CategoryController {
 
-    private final CategoryService categoryService;
-    private final ProductService productService;
+    private final CategoryService objCategoryService;
+    private final ProductService objProductService;
 
-    public CategoryController(CategoryService categoryService, ProductService productService) {
-        this.categoryService = categoryService;
-        this.productService = productService;
+    // CategoryController : constructeur (nom imposé par Java), Spring injecte les services
+    // Reçoit : objCategoryService et objProductService
+    // Renvoie : rien
+    // Pourquoi : donner au contrôleur accès aux catégories et aux produits
+    public CategoryController(CategoryService objCategoryService, ProductService objProductService) {
+        this.objCategoryService = objCategoryService;
+        this.objProductService = objProductService;
     }
 
+    // fGetAll : liste toutes les catégories (GET /api/categories)
+    // Reçoit : rien
+    // Renvoie : la liste des catégories
+    // Pourquoi : alimenter la navigation et la section « Nos univers »
     @GetMapping
-    public List<Category> getAll() {
-        return categoryService.getAllCategories();
+    public List<Category> fGetAll() {
+        return objCategoryService.fGetAllCategories();
     }
 
+    // fGetProducts : liste les produits d'une catégorie (GET /api/categories/{id}/products)
+    // Reçoit : intId, l'identifiant de la catégorie
+    // Renvoie : la liste des produits de cette catégorie
+    // Pourquoi : afficher les produits de la catégorie choisie
     @GetMapping("/{id}/products")
-    public List<Product> getProducts(@PathVariable Long id) {
-        return productService.getProductsByCategory(id);
+    public List<Product> fGetProducts(@PathVariable("id") Long intId) {
+        return objProductService.fGetProductsByCategory(intId);
     }
 }

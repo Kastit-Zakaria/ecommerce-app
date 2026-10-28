@@ -1,3 +1,7 @@
+// Reassurance : barre des engagements (livraison, retours, paiement, service client)
+// Reçoit : rien
+// Renvoie : le JSX de la barre
+// Pourquoi : rassurer le visiteur avant l'achat
 const Reassurance = () => {
     return (
         <section className="reassurance" aria-label="Nos engagements">

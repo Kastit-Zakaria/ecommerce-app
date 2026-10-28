@@ -1,3 +1,7 @@
+// HeroVideo : bannière d'accueil avec vidéo en fond et bouton « Découvrir »
+// Reçoit : rien
+// Renvoie : le JSX de la bannière
+// Pourquoi : accueillir le visiteur et l'amener vers les produits
 const HeroVideo = () => {
     return (
         <section className="hero-video" aria-label="Bannière d'accueil">

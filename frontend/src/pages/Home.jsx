@@ -6,23 +6,27 @@ import ProductList from '../components/ProductList';
 import EditorialBanner from '../components/EditorialBanner';
 import ProductModal from '../components/ProductModal';
 
-const Home = ({ selectedCategory, onSelectCategory }) => {
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const productsRef = useRef(null);
+// Home : page d'accueil (bannière, réassurance, univers, produits, bannière éditoriale)
+// Reçoit : objSelectedCategory (catégorie choisie ou null), fOnSelectCategory (fonction pour la changer)
+// Renvoie : le JSX de la page
+// Pourquoi : assembler les sections de l'accueil et gérer l'ouverture du modal produit
+const Home = ({ objSelectedCategory, fOnSelectCategory }) => {
+    const [objSelectedProduct, fSetObjSelectedProduct] = useState(null);
+    const objProductsRef = useRef(null);
 
     // Quand une catégorie est choisie (header ou univers), on descend jusqu'aux produits
     useEffect(() => {
-        if (selectedCategory !== null) {
-            productsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (objSelectedCategory !== null) {
+            objProductsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-    }, [selectedCategory]);
+    }, [objSelectedCategory]);
 
-    let modal = null;
-    if (selectedProduct !== null) {
-        modal = (
+    let objModal = null;
+    if (objSelectedProduct !== null) {
+        objModal = (
             <ProductModal
-                productId={selectedProduct.id}
-                onClose={() => setSelectedProduct(null)}
+                intProductId={objSelectedProduct.id}
+                fOnClose={() => fSetObjSelectedProduct(null)}
             />
         );
     }
@@ -33,18 +37,18 @@ const Home = ({ selectedCategory, onSelectCategory }) => {
 
             <Reassurance />
 
-            <Universes onSelectCategory={onSelectCategory} />
+            <Universes fOnSelectCategory={fOnSelectCategory} />
 
-            <div id="produits" ref={productsRef}>
+            <div id="produits" ref={objProductsRef}>
                 <ProductList
-                    category={selectedCategory}
-                    onSelectProduct={setSelectedProduct}
+                    objCategory={objSelectedCategory}
+                    fOnSelectProduct={fSetObjSelectedProduct}
                 />
             </div>
 
             <EditorialBanner />
 
-            {modal}
+            {objModal}
         </div>
     );
 };
