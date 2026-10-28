@@ -15,7 +15,15 @@ const App = () => {
                 onSelectCategory={setSelectedCategory}
             />
             <Routes>
-                <Route path="/" element={<Home selectedCategory={selectedCategory} />} />
+                <Route
+                    path="/"
+                    element={
+                        <Home
+                            selectedCategory={selectedCategory}
+                            onSelectCategory={setSelectedCategory}
+                        />
+                    }
+                />
                 <Route path="/about" element={<About />} />
             </Routes>
             <Footer />

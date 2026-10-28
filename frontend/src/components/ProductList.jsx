@@ -7,15 +7,16 @@ const ProductList = ({ category, onSelectProduct }) => {
     const [loading, setLoading] = useState(false);
     const [selectedTypeId, setSelectedTypeId] = useState(null);
 
-    // 1. Charger les produits quand la catégorie change
+    // 1. Charger les produits : derniers arrivages OU produits de la catégorie
     useEffect(() => {
-        if (category === null) {
-            return;
+        let url = '/products/latest';
+        if (category !== null) {
+            url = `/categories/${category.id}/products`;
         }
 
         setLoading(true);
         setSelectedTypeId(null);
-        api.get(`/categories/${category.id}/products`)
+        api.get(url)
             .then((response) => {
                 setProducts(response.data);
                 setLoading(false);
@@ -52,12 +53,12 @@ const ProductList = ({ category, onSelectProduct }) => {
     }
 
     // 4. Titre
-    let title = 'Nos produits';
+    let title = 'Derniers arrivages';
     if (category !== null) {
         title = category.name;
     }
 
-    // 5. Filtres par type (seulement si des produits sont affichés)
+    // 5. Filtres par type (seulement pour une catégorie, avec des produits)
     let filters = null;
     if (category !== null && !loading && types.length > 0) {
         let allClassName = 'type-filter__item';
@@ -98,9 +99,7 @@ const ProductList = ({ category, onSelectProduct }) => {
 
     // 6. Contenu principal
     let content;
-    if (category === null) {
-        content = <p className="product-list__message">Choisissez une catégorie pour afficher ses produits.</p>;
-    } else if (loading) {
+    if (loading) {
         content = <p className="product-list__message">Chargement…</p>;
     } else if (products.length === 0) {
         content = <p className="product-list__message">Aucun produit dans cette catégorie.</p>;

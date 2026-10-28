@@ -31,4 +31,8 @@ public class ProductService {
 
         return result.get();
     }
+
+    public List<Product> getLatestProducts() {
+        return productRepository.findTop8ByOrderByIdDesc();
+    }
 }

@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import HeroVideo from '../components/HeroVideo';
+import Reassurance from '../components/Reassurance';
+import Universes from '../components/Universes';
 import ProductList from '../components/ProductList';
+import EditorialBanner from '../components/EditorialBanner';
 import ProductModal from '../components/ProductModal';
 
-const Home = ({ selectedCategory }) => {
+const Home = ({ selectedCategory, onSelectCategory }) => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const productsRef = useRef(null);
 
-    // Quand une catégorie est choisie (dans le header), on descend jusqu'aux produits
+    // Quand une catégorie est choisie (header ou univers), on descend jusqu'aux produits
     useEffect(() => {
         if (selectedCategory !== null) {
             productsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -28,12 +31,18 @@ const Home = ({ selectedCategory }) => {
         <div className="home-page">
             <HeroVideo />
 
+            <Reassurance />
+
+            <Universes onSelectCategory={onSelectCategory} />
+
             <div id="produits" ref={productsRef}>
                 <ProductList
                     category={selectedCategory}
                     onSelectProduct={setSelectedProduct}
                 />
             </div>
+
+            <EditorialBanner />
 
             {modal}
         </div>
