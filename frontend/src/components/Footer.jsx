@@ -1,19 +1,64 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import fSubscribeNewsletter from '../services/newsletter';
+import objCompany, { fFormatAddress } from '../config/company';
 
 // Footer : pied de page (newsletter, colonnes de liens, réseaux, mentions)
-// Reçoit : rien
+// Reçoit : fOnOpenCookieSettings (fonction qui rouvre le bandeau de consentement aux cookies)
 // Renvoie : le JSX du pied de page
-// Pourquoi : offrir la navigation secondaire et l'inscription à la newsletter
-const Footer = () => {
+// Pourquoi : offrir la navigation secondaire, l'inscription à la newsletter et l'accès aux pages légales
+const Footer = ({ fOnOpenCookieSettings }) => {
     const intCurrentYear = new Date().getFullYear();
+    const [strEmail, fSetStrEmail] = useState('');
+    const [blConsent, fSetBlConsent] = useState(false);
+    const [blSending, fSetBlSending] = useState(false);
+    const [strMessage, fSetStrMessage] = useState('');
+    const [blMessageIsError, fSetBlMessageIsError] = useState(false);
 
-    // fHandleNewsletterSubmit : bloque l'envoi réel du formulaire newsletter
+    // fHandleNewsletterSubmit : envoie l'inscription à la newsletter sans recharger la page
     // Reçoit : objEvent (l'événement de soumission)
     // Renvoie : rien
-    // Pourquoi : éviter le rechargement de la page (l'inscription n'est pas encore branchée)
+    // Pourquoi : inscrire l'e-mail avec le consentement et afficher un message de succès ou d'erreur
     const fHandleNewsletterSubmit = (objEvent) => {
         objEvent.preventDefault();
+
+        if (!blConsent) {
+            fSetStrMessage('Veuillez cocher la case de consentement pour vous inscrire.');
+            fSetBlMessageIsError(true);
+            return;
+        }
+
+        fSetBlSending(true);
+        fSetStrMessage('');
+        fSubscribeNewsletter(strEmail, blConsent)
+            .then((objResponse) => {
+                fSetStrMessage(objResponse.data.message);
+                fSetBlMessageIsError(false);
+                fSetStrEmail('');
+                fSetBlConsent(false);
+                fSetBlSending(false);
+            })
+            .catch((objError) => {
+                let strErrorMessage = 'Une erreur est survenue, veuillez réessayer plus tard.';
+                if (objError.response && objError.response.data && objError.response.data.message) {
+                    strErrorMessage = objError.response.data.message;
+                }
+                fSetStrMessage(strErrorMessage);
+                fSetBlMessageIsError(true);
+                fSetBlSending(false);
+            });
     };
+
+    // Classe du message : rouge pour une erreur, neutre pour un succès
+    let strMessageClassName = 'footer__message';
+    if (blMessageIsError) {
+        strMessageClassName = 'footer__message footer__message--error';
+    }
+
+    let objMessage = null;
+    if (strMessage !== '') {
+        objMessage = <p className={strMessageClassName} role="status">{strMessage}</p>;
+    }
 
     return (
         <footer className="footer">
@@ -34,9 +79,26 @@ const Footer = () => {
                                 type="email"
                                 placeholder="vous@exemple.com"
                                 className="footer__input"
+                                value={strEmail}
+                                onChange={(objEvent) => fSetStrEmail(objEvent.target.value)}
+                                required
                             />
-                            <button type="submit" className="footer__submit">S'inscrire</button>
+                            <button type="submit" className="footer__submit" disabled={blSending}>S'inscrire</button>
                         </div>
+                        <div className="footer__consent">
+                            <input
+                                id="newsletter-consent"
+                                type="checkbox"
+                                className="footer__checkbox"
+                                checked={blConsent}
+                                onChange={(objEvent) => fSetBlConsent(objEvent.target.checked)}
+                            />
+                            <label htmlFor="newsletter-consent" className="footer__consent-label">
+                                J'accepte de recevoir la newsletter de SERA à cette adresse e-mail. Mes données sont traitées
+                                conformément à la <Link to="/confidentialite" className="footer__consent-link">politique de confidentialité</Link>.
+                            </label>
+                        </div>
+                        {objMessage}
                         <p className="footer__hint">Désinscription possible à tout moment.</p>
                     </form>
                 </div>
@@ -95,14 +157,26 @@ const Footer = () => {
                 </div>
             </div>
 
-            {/* 3. Barre finale */}
+            {/* 3. Identité de la société */}
+            <div className="footer__container">
+                <p className="footer__company">
+                    {objCompany.strLegalName} · {fFormatAddress()} · BCE / TVA {objCompany.strBce} ·{' '}
+                    <a href={`mailto:${objCompany.strEmail}`} className="footer__company-link">{objCompany.strEmail}</a> · {objCompany.strPhone}
+                </p>
+            </div>
+
+            {/* 4. Barre finale */}
             <div className="footer__bottom">
                 <div className="footer__container footer__bottom-inner">
                     <span className="footer__logo">Sera</span>
                     <nav className="footer__legal" aria-label="Mentions légales">
-                        <a href="#" className="footer__legal-link">Conditions générales de vente</a>
-                        <a href="#" className="footer__legal-link">Confidentialité</a>
-                        <a href="#" className="footer__legal-link">Cookies</a>
+                        <Link to="/mentions-legales" className="footer__legal-link">Mentions légales</Link>
+                        <Link to="/cgv" className="footer__legal-link">Conditions générales de vente</Link>
+                        <Link to="/confidentialite" className="footer__legal-link">Confidentialité</Link>
+                        <Link to="/cookies" className="footer__legal-link">Cookies</Link>
+                        <button type="button" className="footer__legal-button" onClick={fOnOpenCookieSettings}>
+                            Gérer les cookies
+                        </button>
                     </nav>
                     <span className="footer__copyright">Belgique · FR — © {intCurrentYear} SERA</span>
                 </div>

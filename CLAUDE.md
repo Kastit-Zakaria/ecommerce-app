@@ -8,3 +8,4 @@
 - Commentaires et textes en français.
 - Pas d'opérateurs ternaires : if/else avec accolades.
 - Ne jamais travailler sur main ; ne pas modifier la base sans le dire.
+- Le site est réalisé pour un client réel (boutique SERA) : aucune mention de projet académique ou de données fictives dans le code, les textes ou la documentation.

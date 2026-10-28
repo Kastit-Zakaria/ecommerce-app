@@ -1,6 +1,8 @@
 @import "./settings.css";
 @import "./pages/home.css";
 @import "./pages/about.css";
+@import "./pages/legal.css";
+@import "./components/cookie-banner.css";
 @import "./components/header.css";
 @import "./components/category-list.css";
 @import "./components/hero-video.css";
