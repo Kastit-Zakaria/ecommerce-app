@@ -8,6 +8,12 @@ import { useLocation } from 'react-router-dom';
 const ScrollToTop = () => {
     const { pathname, hash } = useLocation();
 
+    // Le navigateur ne restaure plus la position de défilement : sans cela, le bouton Précédent
+    // rouvrirait la page à son ancienne position au lieu de la remonter en haut
+    useEffect(() => {
+        window.history.scrollRestoration = 'manual';
+    }, []);
+
     useEffect(() => {
         // Lien vers une ancre (#produits) : on laisse la cible gérer le défilement
         if (hash !== '') {

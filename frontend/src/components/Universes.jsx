@@ -2,21 +2,23 @@ import { useState, useEffect } from 'react';
 import objApi from '../services/api';
 
 // Universes : grille « Nos univers », une carte image par catégorie
-// Reçoit : fOnSelectCategory (fonction appelée au clic avec la catégorie)
+// Reçoit : fOnSelectCategory (fonction appelée au clic avec la catégorie), fOnLoaded (fonction appelée quand le chargement est terminé, avec succès ou non)
 // Renvoie : le JSX de la section
-// Pourquoi : offrir un second accès visuel aux catégories depuis l'accueil
-const Universes = ({ fOnSelectCategory }) => {
+// Pourquoi : offrir un second accès visuel aux catégories depuis l'accueil, et prévenir l'accueil quand la hauteur de la section est définitive
+const Universes = ({ fOnSelectCategory, fOnLoaded }) => {
     const [tbCategories, fSetTbCategories] = useState([]);
 
     useEffect(() => {
         objApi.get('/categories')
             .then((objResponse) => {
                 fSetTbCategories(objResponse.data);
+                fOnLoaded();
             })
             .catch((objError) => {
                 console.error('Erreur lors du chargement des univers :', objError);
+                fOnLoaded();
             });
-    }, []);
+    }, [fOnLoaded]);
 
     // On garde seulement les catégories qui ont une image
     const tbUniverses = tbCategories.filter((objCategory) => {

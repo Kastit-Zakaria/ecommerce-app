@@ -39,6 +39,12 @@ describe('ScrollToTop', () => {
         expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' });
     });
 
+    it('désactive la restauration automatique du défilement par le navigateur', () => {
+        fRenderApp();
+
+        expect(window.history.scrollRestoration).toBe('manual');
+    });
+
     it("ne remonte pas quand l'URL contient une ancre", async () => {
         fRenderApp();
         window.scrollTo.mockClear();
