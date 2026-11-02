@@ -1,5 +1,6 @@
 package com.ecommerce.backend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -8,10 +9,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig {
 
+    // Origine du front autorisée (propriété app.cors.allowed-origin, variable CORS_ALLOWED_ORIGIN)
+    @Value("${app.cors.allowed-origin}")
+    private String strAllowedOrigin;
+
     // fCorsConfigurer : déclare les règles CORS de l'API
     // Reçoit : rien
-    // Renvoie : un WebMvcConfigurer qui autorise le front (http://localhost:5173)
-    // Pourquoi : permettre au navigateur d'appeler l'API depuis le serveur Vite
+    // Renvoie : un WebMvcConfigurer qui autorise le front (origine configurée)
+    // Pourquoi : permettre au navigateur d'appeler l'API depuis l'adresse du front, définie par configuration
     @Bean
     public WebMvcConfigurer fCorsConfigurer() {
         return new WebMvcConfigurer() {
@@ -22,7 +27,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry objRegistry) {
                 objRegistry.addMapping("/**")
-                        .allowedOrigins("http://localhost:5173")
+                        .allowedOrigins(strAllowedOrigin)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*");
             }
