@@ -7,7 +7,7 @@ const HeroVideo = () => {
         <section className="hero-video" aria-label="Bannière d'accueil">
             <video
                 className="hero-video__media"
-                src="/videos/hero.webm"
+                src="/videos/hero.mp4"
                 autoPlay
                 muted
                 loop
