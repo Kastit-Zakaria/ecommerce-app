@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import HeroVideo from '../components/HeroVideo';
 import Reassurance from '../components/Reassurance';
 import Universes from '../components/Universes';
@@ -12,14 +13,27 @@ import ProductModal from '../components/ProductModal';
 // Pourquoi : assembler les sections de l'accueil et gérer l'ouverture du modal produit
 const Home = ({ objSelectedCategory, fOnSelectCategory }) => {
     const [objSelectedProduct, fSetObjSelectedProduct] = useState(null);
+    const [blUniversesLoaded, fSetBlUniversesLoaded] = useState(false);
     const objProductsRef = useRef(null);
+    const { hash } = useLocation();
 
-    // Quand une catégorie est choisie (header ou univers), on descend jusqu'aux produits
+    // fHandleUniversesLoaded : note que la section « Nos univers » a fini de se charger
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : cette section pousse la liste des produits vers le bas en s'affichant ; il faut attendre avant de défiler
+    const fHandleUniversesLoaded = useCallback(() => {
+        fSetBlUniversesLoaded(true);
+    }, []);
+
+    // Quand une catégorie est choisie (header ou univers) ou que l'adresse contient #produits, on descend jusqu'aux produits
     useEffect(() => {
-        if (objSelectedCategory !== null) {
+        if (!blUniversesLoaded) {
+            return;
+        }
+        if (objSelectedCategory !== null || hash === '#produits') {
             objProductsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-    }, [objSelectedCategory]);
+    }, [objSelectedCategory, hash, blUniversesLoaded]);
 
     let objModal = null;
     if (objSelectedProduct !== null) {
@@ -37,7 +51,7 @@ const Home = ({ objSelectedCategory, fOnSelectCategory }) => {
 
             <Reassurance />
 
-            <Universes fOnSelectCategory={fOnSelectCategory} />
+            <Universes fOnSelectCategory={fOnSelectCategory} fOnLoaded={fHandleUniversesLoaded} />
 
             <div id="produits" ref={objProductsRef}>
                 <ProductList

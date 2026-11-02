@@ -278,7 +278,7 @@ Déclarées dans `frontend/src/App.jsx` (React Router, `BrowserRouter`).
 | `/confidentialite` | `Confidentialite` | Politique de confidentialité |
 | `/cookies` | `Cookies` | Politique de cookies |
 
-`Header`, `Footer`, `CookieBanner` et `ScrollToTop` sont affichés quelle que soit la route. `ScrollToTop` remonte en haut à chaque changement de page, sauf si l'adresse contient une ancre (`#produits`).
+`Header`, `Footer`, `CookieBanner` et `ScrollToTop` sont affichés quelle que soit la route. `ScrollToTop` remonte en haut à chaque changement de page, sauf si l'adresse contient une ancre (`#produits`), et désactive la restauration automatique du défilement par le navigateur (le bouton Précédent ouvre donc la page en haut). Le défilement vers `#produits` est assuré par `Home`, une fois la section « Nos univers » chargée, car elle modifie la position de la liste des produits en s'affichant.
 
 Il n'y a pas de route dédiée pour une catégorie ou un produit : la catégorie choisie est un état de `App`, et la fiche produit est un modal de `Home`. Une adresse inconnue n'affiche que l'en-tête et le pied de page (aucune route « 404 » n'est déclarée).
 
@@ -299,6 +299,7 @@ Exemple : le visiteur clique sur la catégorie « Femmes » dans l'en-tête.
         │  passé en props à Home et au Header
         ▼
 4. Home                           useEffect → scrollIntoView vers la section produits
+        │                          (une fois « Nos univers » chargé)
         │  objCategory passé à ProductList
         ▼
 5. ProductList                    useEffect([objCategory])
@@ -349,18 +350,18 @@ Résumé des règles de `CLAUDE.md`, qui constitue la définition du fini.
 | Outils | JUnit (Spring Boot Test), H2 en mémoire | Vitest, Testing Library, jsdom |
 | Emplacement | `backend/src/test/java/com/ecommerce/backend/` | Fichiers `*.test.jsx` / `*.test.js` à côté du code, dans `frontend/src/` |
 | Commande | `cd backend` puis `./mvnw test` (`mvnw.cmd test` sous Windows) | `cd frontend` puis `npm test` |
-| Nombre de tests | **22** | **26** |
+| Nombre de tests | **22** | **32** |
 
 **Backend (22 tests)** : `BackendApplicationTests` (1, démarrage du contexte), `ApiIntegrationTest` (6) et `NewsletterIntegrationTest` (4) pour les routes, `CategoryServiceTest` (2), `ProductServiceTest` (5) et `NewsletterServiceTest` (4) pour les services. La base de test est H2 en mémoire (mode MySQL, schéma recréé à chaque exécution) : **elle ne touche jamais à MySQL**.
 
-**Frontend (26 tests, 7 fichiers)** : `CategoryList` (3), `ProductList` (5), `ProductModal` (3), `Footer` (5), `CookieBanner` (5), `ScrollToTop` (2), `formatPrice` (3).
+**Frontend (32 tests, 8 fichiers)** : `CategoryList` (3), `ProductList` (5), `ProductModal` (5), `Footer` (5), `CookieBanner` (5), `ScrollToTop` (3), `Home` (3), `formatPrice` (3).
 
 Autres contrôles :
 
 - `npm run lint` : analyse statique avec oxlint.
 - [`docs/tests-fonctionnels.md`](tests-fonctionnels.md) : cahier de tests manuels (parcours utilisateur, accessibilité), avec les colonnes « résultat obtenu » et « statut » à remplir.
 
-Dernière exécution à la rédaction de ce document : 26/26 tests frontend et 22/22 tests backend réussis.
+Dernière exécution à la rédaction de ce document : 32/32 tests frontend et 22/22 tests backend réussis.
 
 ---
 

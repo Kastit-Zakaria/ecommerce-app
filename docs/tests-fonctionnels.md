@@ -1,10 +1,10 @@
 # Cahier de tests fonctionnels (manuels)
 
-**Exécution du 2 novembre 2026**
+**Dernière exécution : 2 novembre 2026** (historique en fin de document)
 
 - Environnement : local, Windows 11, Chromium 156.0.8078.4. Site sur http://localhost:5173, API sur http://localhost:8080, base MySQL locale.
-- Résumé : **44 OK / 3 KO** sur 47 scénarios.
-- Scénarios KO : TS-05, TS-06, TA-07.
+- Résumé : **47 OK / 0 KO** sur 47 scénarios.
+- Limite connue : dans la fiche produit, le focus n'est pas piégé dans la fenêtre (voir TA-04).
 
 Prérequis : MySQL (XAMPP) démarré, back lancé (`./mvnw spring-boot:run`), front lancé (`npm run dev`), page d'accueil ouverte dans le navigateur.
 Les colonnes « Résultat obtenu » et « Statut » (OK / KO) sont à remplir lors de l'exécution.
@@ -54,10 +54,10 @@ Les colonnes « Résultat obtenu » et « Statut » (OK / KO) sont à remplir lo
 |----|----|--------|------------------|-----------------|--------|
 | TS-01 | Navigation | 1. Descendre tout en bas de l'accueil. 2. Cliquer sur « Mentions légales » dans le footer. | La page s'affiche en haut, sans rechargement ni défilement visible. | Page affichée à 0 px dès le changement de page, sans défilement animé ni rechargement. | OK |
 | TS-02 | Navigation | 1. Répéter avec « Conditions générales de vente », « Confidentialité », « Cookies » puis « Qui sommes-nous ». | Chaque page s'affiche en haut. | CGV, Confidentialité, Cookies et Qui sommes-nous s'affichent chacune à 0 px, sans rechargement. | OK |
-| TS-03 | Navigation | 1. Ouvrir « Mentions légales » et descendre. 2. Cliquer sur une catégorie dans l'en-tête. | On revient à l'accueil puis la page descend jusqu'à la liste des produits de la catégorie (pas en haut). | Retour à l'accueil sans rechargement ; la liste « Femmes » (4 produits) est visible à l'écran, la page n'est pas remise en haut (1 058 px). | OK |
+| TS-03 | Navigation | 1. Ouvrir « Mentions légales » et descendre. 2. Cliquer sur une catégorie dans l'en-tête. | On revient à l'accueil puis la page descend jusqu'à la liste des produits de la catégorie (pas en haut). | Retour à l'accueil sans rechargement ; le titre de la liste « Femmes » est calé juste sous l'en-tête (56 px), comme avec un clic depuis l'accueil. | OK |
 | TS-04 | Navigation | 1. Sur l'accueil, cliquer sur une catégorie. | La page descend jusqu'aux produits (comportement inchangé). | La page descend jusqu'à la liste « Hommes », dont le titre se place juste sous l'en-tête. | OK |
-| TS-05 | Navigation | 1. Ouvrir l'adresse `/#produits` dans le navigateur (ou depuis un lien interne). | La page n'est pas forcée en haut. | Ouverte directement, l'adresse /#produits reste en haut de page (0 px) alors que la zone produits est plus bas ; depuis le bouton « Découvrir la collection », la page descend bien aux produits. | KO |
-| TS-06 | Navigation | 1. Ouvrir une page légale puis cliquer sur Précédent. | La navigation fonctionne sans rechargement et la page affichée est en haut. | Retour à l'accueil sans rechargement, mais la page s'affiche à 1 973 px du haut (partie basse de l'accueil) et non en haut. | KO |
+| TS-05 | Navigation | 1. Ouvrir l'adresse `/#produits` dans le navigateur (ou depuis un lien interne). | La page n'est pas forcée en haut. | Ouverte directement, l'adresse /#produits descend jusqu'aux produits, titre calé sous l'en-tête (56 px) ; même résultat avec le bouton « Découvrir la collection ». | OK |
+| TS-06 | Navigation | 1. Ouvrir une page légale puis cliquer sur Précédent. | La navigation fonctionne sans rechargement et la page affichée est en haut. | Retour à l'accueil sans rechargement, page affichée en haut (0 px), que l'on parte du haut ou du bas de l'accueil. | OK |
 
 ## Obligations légales — bandeau de consentement aux cookies
 
@@ -95,10 +95,37 @@ Prérequis : script `database/newsletter.sql` exécuté dans phpMyAdmin.
 
 | ID | US | Étapes | Résultat attendu | Résultat obtenu | Statut |
 |----|----|--------|------------------|-----------------|--------|
-| TA-01 | US1-US3 | 1. Ouvrir la page d'accueil dans Chrome. 2. Outils de développement (F12) → onglet Lighthouse. 3. Cocher uniquement « Accessibilité », choisir « Ordinateur », cliquer sur « Analyser le chargement de la page ». | Score d'accessibilité ≥ 90, sans erreur bloquante non justifiée. Noter le score et les points signalés. | Score d'accessibilité de 96/100 ; un seul point signalé : contraste insuffisant du texte « Collection d'automne » (4,49:1). | OK |
+| TA-01 | US1-US3 | 1. Ouvrir la page d'accueil dans Chrome. 2. Outils de développement (F12) → onglet Lighthouse. 3. Cocher uniquement « Accessibilité », choisir « Ordinateur », cliquer sur « Analyser le chargement de la page ». | Score d'accessibilité ≥ 90, sans erreur bloquante non justifiée. Noter le score et les points signalés. | Score d'accessibilité de 100/100 ; aucun point signalé. | OK |
 | TA-02 | US1 | 1. Sur la page d'accueil, appuyer sur Tab pour parcourir la page. 2. Atteindre une catégorie et appuyer sur Entrée. | Tous les éléments interactifs reçoivent le focus dans un ordre logique, avec un focus visible. Entrée sur une catégorie affiche ses produits. | Ordre du focus : logo, 5 catégories, 4 icônes, « Découvrir », cartes « Nos univers » ; contour de focus visible partout ; Entrée sur « Femmes » affiche ses 4 produits. | OK |
 | TA-03 | US2 | 1. Après avoir choisi une catégorie, naviguer avec Tab jusqu'à « Voir le produit ». 2. Appuyer sur Entrée. | Le bouton est atteignable au clavier et Entrée ouvre la fiche du produit. | « Voir le produit » est atteint au clavier après les boutons de filtre ; Entrée ouvre la fiche « Robe d'été ». | OK |
-| TA-04 | US3 | 1. Ouvrir une fiche produit. 2. Appuyer sur Tab pour parcourir le modal. 3. Appuyer sur Échap. | Les contrôles du modal (tailles, Fermer) sont atteignables au clavier. Échap ferme le modal. | Après l'ouverture, Tab parcourt d'abord 4 éléments de la page (3 boutons « Voir le produit » et « Découvrir la collection ») puis Fermer, XS, S, M, L ; Échap ferme le modal. | OK |
-| TA-05 | US3 | 1. Fermer le modal avec Échap. 2. Observer l'élément qui a le focus. | Le focus reste utilisable (il n'est pas perdu dans une zone masquée) et on peut continuer à naviguer avec Tab. | Après Échap, aucun élément n'a le focus (il n'est pas rendu au bouton « Voir le produit ») ; Tab reprend ensuite au champ e-mail du pied de page, puis « S'inscrire ». | OK |
+| TA-04 | US3 | 1. Ouvrir une fiche produit. 2. Appuyer sur Tab pour parcourir le modal. 3. Appuyer sur Échap. | Les contrôles du modal (tailles, Fermer) sont atteignables au clavier. Échap ferme le modal. | Entrée sur « Voir le produit » place le focus dans la fenêtre ; Tab atteint Fermer, XS, S, M, L puis sort de la fenêtre (pas de piège du focus : limite connue) ; Échap ferme le modal. | OK |
+| TA-05 | US3 | 1. Fermer le modal avec Échap. 2. Observer l'élément qui a le focus. | Le focus reste utilisable (il n'est pas perdu dans une zone masquée) et on peut continuer à naviguer avec Tab. | Après Échap, le focus revient sur le bouton « Voir le produit » d'origine et Tab continue depuis ce bouton ; même retour après fermeture par ✕ ou par un clic sur le fond. | OK |
 | TA-06 | US2-US3 | 1. Inspecter les images de la page (miniatures, modal, univers, bannières). 2. Vérifier l'attribut `alt` de chacune. | Chaque image porteuse d'information a un texte alternatif pertinent (ex. nom du produit). Les images purement décoratives ont `alt=""`. | Miniatures et fiche : alt = nom du produit ; bannière : alt descriptif ; images « Nos univers » : alt vide ; les 11 icônes SVG sont masquées aux lecteurs d'écran. | OK |
-| TA-07 | US1-US3 | 1. Dans les outils de développement, inspecter un texte (prix, nom, boutons, messages). 2. Lire le ratio de contraste dans le sélecteur de couleur. | Ratio ≥ 4,5:1 pour le texte normal et ≥ 3:1 pour le grand texte (WCAG AA). Vérifier aussi le texte sur les images et vidéos. | Non conforme : « Collection d'automne » à 4,49:1 (seuil 4,5:1) ; sur « Nos univers », titres blancs sur photo entre 1,9:1 et 4,3:1 (seuil 3:1) et « Voir la collection » entre 2,9:1 et 4,9:1 (seuil 4,5:1) ; texte de la vidéo d'accueil conforme (au moins 5,8:1). | KO |
+| TA-07 | US1-US3 | 1. Dans les outils de développement, inspecter un texte (prix, nom, boutons, messages). 2. Lire le ratio de contraste dans le sélecteur de couleur. | Ratio ≥ 4,5:1 pour le texte normal et ≥ 3:1 pour le grand texte (WCAG AA). Vérifier aussi le texte sur les images et vidéos. | Conforme : « Collection d'automne » à 5,63:1 ; sur « Nos univers », titres au moins à 8,4:1 (seuil 3:1) et « Voir la collection » au moins à 9,6:1 (seuil 4,5:1) ; texte de la vidéo d'accueil au moins à 6,4:1 ; aucun contraste signalé à l'audit. | OK |
+
+## Historique des exécutions
+
+### 1re exécution — 2 novembre 2026 : 44 OK / 3 KO
+
+| ID | Écart constaté |
+|----|----------------|
+| TS-05 | L'adresse /#produits ouverte directement restait en haut de page : l'ancre n'existait pas encore au moment où le navigateur la cherchait. |
+| TS-06 | Après « Précédent » depuis une page légale, l'accueil s'affichait à 1 973 px du haut au lieu d'être en haut. |
+| TA-07 | Contrastes insuffisants : « Collection d'automne » (4,49:1) et, sur les cartes « Nos univers », les titres et « Voir la collection » sur photo. |
+
+Limites relevées, scénarios déclarés OK : TS-03 (titre de la liste à 477 px du haut au lieu de 56 px), TA-04 et TA-05 (focus non géré à l'ouverture et à la fermeture de la fiche produit), absence de description pour les moteurs de recherche.
+
+### Défauts corrigés
+
+- **TS-05** : l'accueil descend lui-même jusqu'aux produits lorsque l'adresse contient #produits, une fois la section « Nos univers » chargée.
+- **TS-06** : le navigateur ne restaure plus l'ancienne position de défilement ; chaque page s'ouvre en haut.
+- **TA-07** : dégradé sombre renforcé sous le texte des cartes « Nos univers » et gris plus foncé pour « Collection d'automne ».
+- **TS-03** : le défilement vers la liste attend la fin du chargement de « Nos univers », qui déplaçait la liste en s'affichant.
+- **TA-04 / TA-05** : à l'ouverture de la fiche produit, le focus entre dans la fenêtre ; à la fermeture, il revient sur le bouton « Voir le produit » d'origine.
+- Ajout d'une description en français dans la page d'accueil pour les moteurs de recherche.
+
+### 2e exécution — 2 novembre 2026 : 47 OK / 0 KO
+
+Scénarios rejoués : TS-03, TS-05, TS-06, TA-01, TA-04, TA-05 et TA-07. Contrôle de non-régression : TS-01, TS-02, TS-04 et fermeture de la fiche produit (position de la page inchangée). Les autres scénarios n'ont pas été modifiés par les corrections et ne sont pas rejoués.
+
+Limite connue : le focus n'est pas piégé dans la fiche produit ; après le dernier contrôle de la fenêtre, Tab passe à la suite de la page.

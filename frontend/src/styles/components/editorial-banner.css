@@ -34,7 +34,8 @@
     font-size: 12px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    /* Gris un peu plus foncé que --color-muted : contraste suffisant sur le fond beige */
+    color: #5c5c5c;
 }
 
 .editorial__title {

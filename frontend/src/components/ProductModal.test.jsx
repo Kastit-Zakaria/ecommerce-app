@@ -37,6 +37,29 @@ describe('ProductModal', () => {
         expect(objApi.get).toHaveBeenCalledWith('/products/10');
     });
 
+    it("place le focus dans la fenêtre à l'ouverture", async () => {
+        objApi.get.mockResolvedValue({ data: objProduct });
+
+        render(<ProductModal intProductId={10} fOnClose={vi.fn()} />);
+
+        expect(screen.getByRole('dialog')).toHaveFocus();
+    });
+
+    it('rend le focus au bouton qui a ouvert la fiche à la fermeture', async () => {
+        objApi.get.mockResolvedValue({ data: objProduct });
+        const objTrigger = document.createElement('button');
+        document.body.appendChild(objTrigger);
+        objTrigger.focus();
+
+        const { unmount } = render(<ProductModal intProductId={10} fOnClose={vi.fn()} />);
+        expect(objTrigger).not.toHaveFocus();
+
+        unmount();
+
+        expect(objTrigger).toHaveFocus();
+        objTrigger.remove();
+    });
+
     it('appelle fOnClose avec la touche Échap', async () => {
         objApi.get.mockResolvedValue({ data: objProduct });
         const fOnClose = vi.fn();

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import objApi from '../services/api';
 import fFormatPrice from '../utils/formatPrice';
 
@@ -9,6 +9,21 @@ import fFormatPrice from '../utils/formatPrice';
 const ProductModal = ({ intProductId, fOnClose }) => {
     const [objProduct, fSetObjProduct] = useState(null);
     const [intSelectedSize, fSetIntSelectedSize] = useState(null);
+
+    const objDialogRef = useRef(null);
+
+    // 0. Focus : entrer dans le modal à l'ouverture, revenir au bouton d'origine à la fermeture
+    useEffect(() => {
+        const objPreviousFocus = document.activeElement;
+        objDialogRef.current.focus();
+
+        // Nettoyage : exécuté à la fermeture du modal
+        return () => {
+            if (objPreviousFocus !== null && objPreviousFocus.focus) {
+                objPreviousFocus.focus();
+            }
+        };
+    }, []);
 
     // 1. Charger le produit depuis l'API
     useEffect(() => {
@@ -102,6 +117,8 @@ const ProductModal = ({ intProductId, fOnClose }) => {
             <div className="product-modal__backdrop" onClick={fOnClose}></div>
 
             <div
+                ref={objDialogRef}
+                tabIndex={-1}
                 className="product-modal__dialog"
                 role="dialog"
                 aria-modal="true"
