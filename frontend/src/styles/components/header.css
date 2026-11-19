@@ -78,6 +78,74 @@
     opacity: 0.7;
 }
 
+/* Zone du compte : sert de repère de position au panneau déroulant */
+.header__account {
+    position: relative;
+}
+
+/* Panneau déroulant du compte (membre connecté) */
+.header__panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 110;
+    min-width: 220px;
+    padding: 8px 0;
+    background: #ffffff;
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.header__panel[hidden] {
+    display: none;
+}
+
+.header__panel-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.header__panel-option {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 12px 20px;
+    border: none;
+    background: none;
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.header__panel-option:hover,
+.header__panel-option:focus-visible {
+    background: #f4f4f2;
+}
+
+.header__panel-option:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: -2px;
+}
+
+/* Message d'erreur de déconnexion (rouge assez foncé pour le contraste sur fond blanc) */
+.header__panel-alert:empty {
+    display: none;
+}
+
+.header__panel-error {
+    margin: 0;
+    padding: 8px 20px 4px;
+    color: #b00020;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
 /* Message « Bienvenue, <prénom> » (masqué tant que personne n'est connecté) */
 .header__welcome {
     align-self: center;

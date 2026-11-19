@@ -1,0 +1,50 @@
+/* Page « Mon compte » : informations du membre en lecture seule */
+.account-page {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 56px 24px 0;
+}
+
+.account-page__title {
+    margin: 0 0 32px;
+    font-size: 34px;
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.account-page__list {
+    margin: 0;
+    border-top: 1px solid var(--color-border);
+}
+
+.account-page__row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.account-page__label {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.account-page__value {
+    margin: 0;
+    font-size: 16px;
+    overflow-wrap: anywhere;
+}
+
+/* Écran étroit : libellé au-dessus de la valeur */
+@media (max-width: 600px) {
+    .account-page__row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+}

@@ -143,6 +143,34 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.passwordHash").doesNotExist());
     }
 
+    // fLogout_deconnecteUnMembre : déconnexion avec une session ouverte
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : vérifier le 204, puis que /me répond 401 avec la même session
+    @Test
+    void fLogout_deconnecteUnMembre() throws Exception {
+        MvcResult objLoginResult = fPostLogin("{\"email\":\"camille@exemple.com\",\"password\":\"MotDePasse-1\"}")
+                .andExpect(status().isOk())
+                .andReturn();
+        MockHttpSession objSession = (MockHttpSession) objLoginResult.getRequest().getSession(false);
+
+        objMockMvc.perform(post("/api/auth/logout").session(objSession))
+                .andExpect(status().isNoContent());
+
+        objMockMvc.perform(get("/api/auth/me").session(objSession))
+                .andExpect(status().isUnauthorized());
+    }
+
+    // fLogout_repond204SansSession : déconnexion sans aucune session
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : vérifier que l'appel n'est pas une erreur
+    @Test
+    void fLogout_repond204SansSession() throws Exception {
+        objMockMvc.perform(post("/api/auth/logout"))
+                .andExpect(status().isNoContent());
+    }
+
     // fLogin_renouvelleLaSession : une session existante est remplacée à la connexion
     // Reçoit : rien
     // Renvoie : rien
