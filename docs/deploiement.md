@@ -6,7 +6,7 @@
 - Node.js (version LTS) et npm pour construire le frontend
 - MySQL 8 ou MariaDB (équivalent à la base XAMPP utilisée en développement)
 - Un serveur web (Nginx, Apache, hébergement statique…) pour servir le frontend
-- Un nom de domaine et un certificat HTTPS pour le site et pour l'API
+- Un nom de domaine et un certificat HTTPS pour le site et pour l'API. **Le HTTPS est obligatoire en production** : c'est lui qui protège le mot de passe pendant son transport entre le navigateur et l'API.
 
 ## Variables d'environnement
 
@@ -27,6 +27,9 @@ La valeur est intégrée au site lors de `npm run build` : il faut donc reconstr
 | `DB_USERNAME` | Utilisateur MySQL | `root` |
 | `DB_PASSWORD` | Mot de passe MySQL | (vide) |
 | `CORS_ALLOWED_ORIGIN` | Origine du site autorisée à appeler l'API (ex. `https://www.sera.be`) | `http://localhost:5173` |
+| `SESSION_COOKIE_SECURE` | `true` en production : le cookie de session n'est envoyé qu'en HTTPS | `false` |
+
+**Connexion et session.** Le site et l'API doivent être servis en HTTPS et appartenir au même domaine (ex. `www.sera.be` et `api.sera.be`) : le cookie de session est alors envoyé avec les requêtes du site. En production, `SESSION_COOKIE_SECURE=true` est obligatoire (cookie `Secure`) ; le cookie est de toute façon `HttpOnly` et `SameSite=Lax`. Si le proxy inverse termine le HTTPS, il doit transmettre `X-Forwarded-Proto` pour que l'API sache que la connexion est sécurisée.
 
 En production, créer un utilisateur MySQL dédié avec un mot de passe robuste : ne pas utiliser `root` sans mot de passe.
 
@@ -69,6 +72,7 @@ export DB_URL="jdbc:mysql://<hote>:3306/ecommercedb?useSSL=true&serverTimezone=U
 export DB_USERNAME="<utilisateur>"
 export DB_PASSWORD="<mot_de_passe>"
 export CORS_ALLOWED_ORIGIN="https://www.sera.be"
+export SESSION_COOKIE_SECURE="true"
 java -jar backend/target/backend-0.0.1-SNAPSHOT.jar
 ```
 

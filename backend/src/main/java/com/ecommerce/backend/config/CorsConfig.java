@@ -29,7 +29,9 @@ public class CorsConfig {
                 objRegistry.addMapping("/**")
                         .allowedOrigins(strAllowedOrigin)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        // Nécessaire pour que le navigateur envoie et reçoive le cookie de session
+                        .allowCredentials(true);
             }
         };
     }

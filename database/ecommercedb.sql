@@ -475,6 +475,11 @@ ALTER TABLE `products`
 ALTER TABLE `product_sizes`
   ADD CONSTRAINT `fk_ps_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_ps_size` FOREIGN KEY (`size_id`) REFERENCES `sizes` (`id`);
+--
+-- Compte de test pour la connexion (mot de passe hashé en BCrypt)
+--
+INSERT INTO `users` (`first_name`, `last_name`, `email`, `password_hash`, `role`) VALUES
+('Camille', 'Dupont', 'compte.test@exemple.com', '$2a$10$/8tPQ/hEQtkiqI2CtL8tcupn8Mk4ap2ID4UIDr7gbfAPKNWZmzHRe', 'ROLE_USER');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
