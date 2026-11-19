@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import Header from './Header';
@@ -91,5 +91,128 @@ describe('Header (connexion)', () => {
         await userEvent.click(screen.getByRole('button', { name: 'Mon compte' }));
 
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it("n'affiche aucun dropdown pour un visiteur", async () => {
+        fMockApi(null);
+        fRenderHeader();
+
+        const objAccount = await screen.findByRole('button', { name: 'Mon compte' });
+
+        expect(objAccount).toHaveAttribute('aria-haspopup', 'dialog');
+        expect(objAccount).not.toHaveAttribute('aria-expanded');
+        expect(screen.queryByRole('link', { name: 'Paramètres' })).not.toBeInTheDocument();
+    });
+});
+
+describe('Header (dropdown du compte)', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        fMockApi(objMember);
+    });
+
+    // fOpenMenu : attend la connexion puis ouvre le dropdown
+    // Reçoit : rien
+    // Renvoie : le bouton « Mon compte »
+    // Pourquoi : partager l'ouverture entre les tests
+    const fOpenMenu = async () => {
+        fRenderHeader();
+        await screen.findByText('Bienvenue, Camille');
+        const objAccount = screen.getByRole('button', { name: 'Mon compte' });
+        await userEvent.click(objAccount);
+        return objAccount;
+    };
+
+    it('ouvre le dropdown : aria-expanded, aria-controls et focus sur « Paramètres »', async () => {
+        fRenderHeader();
+        await screen.findByText('Bienvenue, Camille');
+        const objAccount = screen.getByRole('button', { name: 'Mon compte' });
+        expect(objAccount).toHaveAttribute('aria-expanded', 'false');
+        expect(objAccount).toHaveAttribute('aria-controls', 'account-panel');
+        expect(screen.queryByRole('link', { name: 'Paramètres' })).not.toBeInTheDocument();
+
+        await userEvent.click(objAccount);
+
+        expect(objAccount).toHaveAttribute('aria-expanded', 'true');
+        expect(screen.getByRole('link', { name: 'Paramètres' })).toHaveFocus();
+    });
+
+    it('propose « Paramètres » puis « Se déconnecter », dans une liste sans rôle menu', async () => {
+        await fOpenMenu();
+
+        const tbItems = screen.getAllByRole('listitem');
+        expect(tbItems).toHaveLength(2);
+        expect(tbItems[0]).toHaveTextContent('Paramètres');
+        expect(tbItems[1]).toHaveTextContent('Se déconnecter');
+        expect(screen.getByRole('link', { name: 'Paramètres' })).toHaveAttribute('href', '/mon-compte');
+        expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+        expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    });
+
+    it("se ferme avec l'icône compte", async () => {
+        const objAccount = await fOpenMenu();
+
+        await userEvent.click(objAccount);
+
+        expect(objAccount).toHaveAttribute('aria-expanded', 'false');
+        expect(screen.queryByRole('link', { name: 'Paramètres' })).not.toBeInTheDocument();
+    });
+
+    it("se ferme avec Échap et rend le focus à l'icône compte", async () => {
+        const objAccount = await fOpenMenu();
+
+        await userEvent.keyboard('{Escape}');
+
+        expect(objAccount).toHaveAttribute('aria-expanded', 'false');
+        expect(screen.queryByRole('button', { name: 'Se déconnecter' })).not.toBeInTheDocument();
+        expect(objAccount).toHaveFocus();
+    });
+
+    it('se ferme au clic en dehors, sans rendre le focus à l\'icône compte', async () => {
+        const objAccount = await fOpenMenu();
+
+        await userEvent.click(document.body);
+
+        expect(objAccount).toHaveAttribute('aria-expanded', 'false');
+        expect(screen.queryByRole('button', { name: 'Se déconnecter' })).not.toBeInTheDocument();
+        expect(objAccount).not.toHaveFocus();
+    });
+
+    it('se ferme après le choix de « Paramètres »', async () => {
+        const objAccount = await fOpenMenu();
+
+        await userEvent.click(screen.getByRole('link', { name: 'Paramètres' }));
+
+        expect(objAccount).toHaveAttribute('aria-expanded', 'false');
+        expect(objAccount).toHaveFocus();
+    });
+
+    it('déconnecte le membre : la bienvenue disparaît, le focus revient, et l\'icône rouvre le modal', async () => {
+        objApi.post.mockResolvedValue({ status: 204 });
+        const objAccount = await fOpenMenu();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Se déconnecter' }));
+
+        await waitFor(() => {
+            expect(screen.queryByText(/Bienvenue/)).not.toBeInTheDocument();
+        });
+        expect(objApi.post).toHaveBeenCalledWith('/auth/logout');
+        expect(screen.queryByRole('button', { name: 'Se déconnecter' })).not.toBeInTheDocument();
+        expect(objAccount).toHaveFocus();
+
+        await userEvent.click(objAccount);
+        expect(screen.getByRole('dialog', { name: 'Connexion' })).toBeInTheDocument();
+    });
+
+    it('échec réseau : message dans le dropdown ouvert, le membre reste connecté', async () => {
+        objApi.post.mockRejectedValue(new Error('Network Error'));
+        const objAccount = await fOpenMenu();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Se déconnecter' }));
+
+        expect(await screen.findByText(/Déconnexion impossible pour le moment/)).toBeInTheDocument();
+        expect(screen.getByText('Bienvenue, Camille')).toBeInTheDocument();
+        expect(objAccount).toHaveAttribute('aria-expanded', 'true');
+        expect(screen.getByRole('button', { name: 'Se déconnecter' })).toBeInTheDocument();
     });
 });

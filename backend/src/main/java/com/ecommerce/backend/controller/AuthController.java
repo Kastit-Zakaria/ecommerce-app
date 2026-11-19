@@ -97,6 +97,19 @@ public class AuthController {
         return ResponseEntity.ok(fToResponse(objUser));
     }
 
+    // fLogout : déconnecte le membre (POST /api/auth/logout)
+    // Reçoit : objHttpRequest (pour retrouver la session)
+    // Renvoie : 204 dans tous les cas, avec ou sans session
+    // Pourquoi : détruire la session côté serveur ; l'appel reste inoffensif si le membre est déjà déconnecté
+    @PostMapping("/logout")
+    public ResponseEntity<Void> fLogout(HttpServletRequest objHttpRequest) {
+        HttpSession objSession = objHttpRequest.getSession(false);
+        if (objSession != null) {
+            objSession.invalidate();
+        }
+        return ResponseEntity.noContent().build();
+    }
+
     // fHandleError : transforme l'erreur du service en réponse JSON { "message": "..." }
     // Reçoit : objException, l'erreur levée (400 ou 401)
     // Renvoie : la réponse avec le même code HTTP et le message en français
