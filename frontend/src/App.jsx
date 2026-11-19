@@ -8,6 +8,8 @@ import MentionsLegales from './pages/MentionsLegales';
 import Cgv from './pages/Cgv';
 import Confidentialite from './pages/Confidentialite';
 import Cookies from './pages/Cookies';
+import MonCompte from './pages/MonCompte';
+import MemberRoute from './components/MemberRoute';
 import CookieBanner from './components/CookieBanner';
 import ScrollToTop from './components/ScrollToTop';
 import { AuthProvider } from './context/AuthContext';
@@ -44,6 +46,14 @@ const App = () => {
                     <Route path="/cgv" element={<Cgv />} />
                     <Route path="/confidentialite" element={<Confidentialite />} />
                     <Route path="/cookies" element={<Cookies />} />
+                    <Route
+                        path="/mon-compte"
+                        element={
+                            <MemberRoute>
+                                <MonCompte />
+                            </MemberRoute>
+                        }
+                    />
                 </Routes>
                 <Footer fOnOpenCookieSettings={() => fSetBlCookieSettingsOpen(true)} />
                 <CookieBanner

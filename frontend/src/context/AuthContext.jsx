@@ -42,8 +42,21 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // fLogout : demande à l'API de détruire la session, puis oublie le membre
+    // Reçoit : rien
+    // Renvoie : une promesse ; elle échoue avec un Error affichable si l'API est injoignable
+    // Pourquoi : redevenir visiteur ; en cas d'échec le membre reste connecté, car sa session existe encore côté serveur
+    const fLogout = async () => {
+        try {
+            await objApi.post('/auth/logout');
+        } catch {
+            throw new Error('Déconnexion impossible pour le moment. Veuillez réessayer plus tard.');
+        }
+        fSetObjUser(null);
+    };
+
     return (
-        <AuthContext.Provider value={{ objUser, blChecking, fLogin }}>
+        <AuthContext.Provider value={{ objUser, blChecking, fLogin, fLogout }}>
             {children}
         </AuthContext.Provider>
     );

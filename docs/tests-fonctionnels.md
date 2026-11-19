@@ -3,7 +3,7 @@
 **Dernière exécution : 2 novembre 2026** (historique en fin de document)
 
 - Environnement : local, Windows 11, Chromium 156.0.8078.4. Site sur http://localhost:5173, API sur http://localhost:8080, base MySQL locale.
-- Résumé de la dernière exécution : **47 OK / 0 KO** sur 47 scénarios. Les 14 scénarios TF-US4-xx (connexion) ont été ajoutés depuis : à exécuter.
+- Résumé de la dernière exécution : **47 OK / 0 KO** sur 47 scénarios. Les 14 scénarios TF-US4-xx (connexion) et les 16 scénarios TF-US7-xx (déconnexion, page Mon compte) ont été ajoutés depuis : à exécuter.
 - Limite connue : dans la fiche produit, le focus n'est pas piégé dans la fenêtre (voir TA-04).
 
 Prérequis : MySQL (XAMPP) démarré, back lancé (`./mvnw spring-boot:run`), front lancé (`npm run dev`), page d'accueil ouverte dans le navigateur.
@@ -56,6 +56,29 @@ Prérequis : le compte de test de `database/ecommercedb.sql` est présent dans l
 | TF-US4-12 | US4 | 1. Ouvrir le modal. 2. Saisir un mot de passe et observer le champ. 3. Dans les outils de développement (F12, onglet Réseau), observer la réponse de la connexion. | Le mot de passe est masqué à la saisie ; la réponse ne contient que le prénom, le nom et l'e-mail (ni mot de passe ni empreinte). | | |
 | TF-US4-13 | US4 | 1. Arrêter le back. 2. Saisir des identifiants et cliquer sur « Se connecter ». | Un message indique que la connexion est impossible pour le moment ; la page ne plante pas. | | |
 | TF-US4-14 | US4 | 1. Activer un lecteur d'écran (ou observer l'arbre d'accessibilité). 2. Provoquer une erreur de connexion. | Le message d'erreur est annoncé au lecteur d'écran sans déplacer le focus hors du formulaire ; chaque champ est annoncé avec son label. | | |
+
+## US7 — Déconnexion et page Mon compte
+
+Prérequis : être connecté avec le compte de test (voir US4). Pour les scénarios d'accès visiteur, utiliser un navigateur non connecté ou se déconnecter d'abord.
+
+| ID | US | Étapes | Résultat attendu | Résultat obtenu | Statut |
+|----|----|--------|------------------|-----------------|--------|
+| TF-US7-01 | US7 | 1. Se connecter. 2. Cliquer sur l'icône « Mon compte ». | Un petit panneau s'ouvre sous l'icône avec deux options, dans cet ordre : « Paramètres » puis « Se déconnecter » ; le focus est sur « Paramètres ». | | |
+| TF-US7-02 | US7 | 1. Ouvrir le panneau. 2. Appuyer sur Tab, puis sur Maj+Tab. | Le focus passe de « Paramètres » à « Se déconnecter » et inversement, avec un contour visible ; les flèches du clavier ne sont pas nécessaires. | | |
+| TF-US7-03 | US7 | 1. Ouvrir le panneau. 2. Appuyer sur Échap. | Le panneau se ferme et le focus revient sur l'icône « Mon compte ». | | |
+| TF-US7-04 | US7 | 1. Ouvrir le panneau. 2. Cliquer dans une zone vide de la page, en dehors du panneau. | Le panneau se ferme ; le focus n'est pas ramené de force sur l'icône. | | |
+| TF-US7-05 | US7 | 1. Ouvrir le panneau. 2. Cliquer de nouveau sur l'icône « Mon compte ». | Le panneau se ferme. | | |
+| TF-US7-06 | US7 | 1. Ouvrir le panneau. 2. Cliquer sur « Paramètres ». | La page « Mon compte » s'affiche à l'adresse /mon-compte, le panneau est fermé et le focus est revenu sur l'icône. | | |
+| TF-US7-07 | US7 | 1. Ouvrir la page « Mon compte » en tant que membre. | Le titre « Mon compte » est affiché, avec le prénom, le nom et l'adresse e-mail du membre, en lecture seule (aucun champ ni formulaire à remplir). | | |
+| TF-US7-08 | US7 | 1. Se déconnecter. 2. Saisir directement http://localhost:5173/mon-compte dans la barre d'adresse. | Le visiteur est redirigé vers l'accueil et le modal de connexion s'ouvre. Après fermeture du modal puis rechargement (F5), le modal ne se rouvre pas. | | |
+| TF-US7-09 | US7 | 1. Se connecter. 2. Ouvrir la page « Mon compte ». 3. Recharger la page (F5). | La page « Mon compte » reste affichée (pas de redirection) avec les informations du membre. | | |
+| TF-US7-10 | US7 | 1. Se connecter. 2. Aller sur l'accueil, une fiche produit (catégorie puis « Voir le produit »), puis « Qui sommes-nous ». 3. Sur chaque page, ouvrir le panneau et cliquer sur « Se déconnecter ». | Sur chaque page, la déconnexion est possible ; le visiteur reste sur la page où il était, « Bienvenue, [prénom] » disparaît et le panneau se ferme. | | |
+| TF-US7-11 | US7 | 1. Se connecter. 2. Ouvrir la page « Mon compte ». 3. Ouvrir le panneau et cliquer sur « Se déconnecter ». | Le visiteur est ramené à l'accueil ; « Bienvenue » a disparu et le modal de connexion ne s'ouvre pas de lui-même. | | |
+| TF-US7-12 | US7 | 1. Se déconnecter. 2. Cliquer sur l'icône « Mon compte ». | Le modal de connexion s'ouvre (comportement d'un visiteur) ; il n'y a pas de panneau. | | |
+| TF-US7-13 | US7 | 1. Se connecter. 2. Se déconnecter. 3. Recharger la page (F5). | Le visiteur reste déconnecté : aucun « Bienvenue ». Dans les outils de développement (F12, onglet Réseau), la requête « logout » répond 204 et un appel à « me » répond 401. | | |
+| TF-US7-14 | US7 | 1. Se connecter. 2. Arrêter le back. 3. Ouvrir le panneau et cliquer sur « Se déconnecter ». | Le message « Déconnexion impossible pour le moment. Veuillez réessayer plus tard. » s'affiche dans le panneau, qui reste ouvert ; le membre reste connecté (« Bienvenue » toujours visible). | | |
+| TF-US7-15 | US7 | 1. Activer un lecteur d'écran (ou observer l'arbre d'accessibilité). 2. Examiner l'icône « Mon compte » connecté, puis provoquer l'échec de déconnexion du scénario précédent. | L'icône est annoncée comme bouton replié ou déplié, relié au panneau ; le panneau est une simple liste (pas de menu à flèches) ; le message d'erreur est annoncé sans que le focus quitte le panneau. | | |
+| TF-US7-16 | US7 | 1. Se déconnecter. 2. Examiner l'icône « Mon compte » à l'aide d'un lecteur d'écran (ou de l'arbre d'accessibilité). | L'icône annonce l'ouverture d'une fenêtre de dialogue (connexion) et n'indique pas d'état replié ou déplié. | | |
 
 ## Obligations légales — pages légales
 
