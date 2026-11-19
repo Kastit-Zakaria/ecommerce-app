@@ -22,6 +22,15 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
+    @Column(name = "address", nullable = false, length = 255)
+    private String address;
+
+    @Column(name = "postal_code", nullable = false, length = 10)
+    private String postalCode;
+
+    @Column(name = "city", nullable = false, length = 100)
+    private String city;
+
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
