@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : mer. 28 oct. 2026 à 14:39
+-- Généré le : jeu. 19 nov. 2026 à 20:19
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -294,6 +294,13 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Déchargement des données de la table `users`
+--
+
+INSERT INTO `users` (`id`, `first_name`, `last_name`, `address`, `postal_code`, `city`, `email`, `password_hash`, `role`) VALUES
+(1, 'Camille', 'Dupont', 'Rue de l\'Exemple 12', '1000', 'Bruxelles', 'compte.test@exemple.com', '$2a$10$/8tPQ/hEQtkiqI2CtL8tcupn8Mk4ap2ID4UIDr7gbfAPKNWZmzHRe', 'ROLE_USER');
+
+--
 -- Index pour les tables déchargées
 --
 
@@ -397,7 +404,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT pour la table `newsletter_subscribers`
 --
 ALTER TABLE `newsletter_subscribers`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT pour la table `orders`
@@ -439,7 +446,7 @@ ALTER TABLE `sizes`
 -- AUTO_INCREMENT pour la table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Contraintes pour les tables déchargées
@@ -478,11 +485,6 @@ ALTER TABLE `products`
 ALTER TABLE `product_sizes`
   ADD CONSTRAINT `fk_ps_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_ps_size` FOREIGN KEY (`size_id`) REFERENCES `sizes` (`id`);
---
--- Compte de test pour la connexion (mot de passe hashé en BCrypt)
---
-INSERT INTO `users` (`first_name`, `last_name`, `address`, `postal_code`, `city`, `email`, `password_hash`, `role`) VALUES
-('Camille', 'Dupont', 'Rue de l''Exemple 12', '1000', 'Bruxelles', 'compte.test@exemple.com', '$2a$10$/8tPQ/hEQtkiqI2CtL8tcupn8Mk4ap2ID4UIDr7gbfAPKNWZmzHRe', 'ROLE_USER');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
