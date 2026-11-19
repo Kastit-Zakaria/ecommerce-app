@@ -9,6 +9,8 @@ if (!strApiUrl) {
 // Client HTTP partagé : toutes les requêtes vers le back passent par cet objet
 const objApi = axios.create({
     baseURL: strApiUrl,
+    // Envoie et reçoit le cookie de session (connexion)
+    withCredentials: true,
 });
 
 export default objApi;

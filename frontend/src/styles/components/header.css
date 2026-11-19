@@ -78,6 +78,23 @@
     opacity: 0.7;
 }
 
+/* Message « Bienvenue, <prénom> » (masqué tant que personne n'est connecté) */
+.header__welcome {
+    align-self: center;
+    margin: 0 8px 0 0;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #ffffff;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+}
+
+.header__welcome:empty {
+    display: none;
+}
+
 /* Écran étroit : logo + icônes sur la 1re ligne, catégories sur la 2e */
 @media (max-width: 900px) {
     .header__main {
@@ -95,5 +112,10 @@
 
     .header__actions {
         gap: 4px;
+    }
+
+    .header__welcome {
+        max-width: 140px;
+        font-size: 12px;
     }
 }

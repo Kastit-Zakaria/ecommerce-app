@@ -3,7 +3,7 @@
 **Dernière exécution : 2 novembre 2026** (historique en fin de document)
 
 - Environnement : local, Windows 11, Chromium 156.0.8078.4. Site sur http://localhost:5173, API sur http://localhost:8080, base MySQL locale.
-- Résumé : **47 OK / 0 KO** sur 47 scénarios.
+- Résumé de la dernière exécution : **47 OK / 0 KO** sur 47 scénarios. Les 14 scénarios TF-US4-xx (connexion) ont été ajoutés depuis : à exécuter.
 - Limite connue : dans la fiche produit, le focus n'est pas piégé dans la fenêtre (voir TA-04).
 
 Prérequis : MySQL (XAMPP) démarré, back lancé (`./mvnw spring-boot:run`), front lancé (`npm run dev`), page d'accueil ouverte dans le navigateur.
@@ -35,6 +35,27 @@ Les colonnes « Résultat obtenu » et « Statut » (OK / KO) sont à remplir lo
 | TF-US3-02 | US3 | 1. Ouvrir la fiche d'un produit. 2. Vérifier le prix. | Le prix est au format belge (ex. « 64,90 € »). | Le prix s'affiche « 64,90 € », avec virgule décimale et symbole euro. | OK |
 | TF-US3-03 | US3 | 1. Ouvrir la fiche d'un produit. 2. Observer l'onglet du navigateur. | La page ne se recharge pas et l'URL ne change pas. | Aucun rechargement et l'URL reste « / » à l'ouverture de la fiche. | OK |
 | TF-US3-04 | US3 | 1. Ouvrir la fiche d'un produit. 2. Cliquer sur ✕ (ou en dehors de la fenêtre). | Le modal se ferme et on retrouve la liste des produits au même endroit. | Fenêtre fermée par ✕ puis par un clic sur le fond ; les 4 produits sont affichés à la même position de défilement (1 479 px). | OK |
+
+## US4 — Connexion
+
+Prérequis : le compte de test de `database/ecommercedb.sql` est présent dans la table `users`.
+
+| ID | US | Étapes | Résultat attendu | Résultat obtenu | Statut |
+|----|----|--------|------------------|-----------------|--------|
+| TF-US4-01 | US4 | 1. Ouvrir la page d'accueil. 2. Cliquer sur l'icône « Mon compte » de l'en-tête. | Un modal « Connexion » s'ouvre avec les champs « Adresse e-mail » et « Mot de passe » ; le focus est sur le champ e-mail ; la page ne défile plus. | | |
+| TF-US4-02 | US4 | 1. Ouvrir le modal de connexion. 2. Saisir l'e-mail et le mot de passe du compte de test. 3. Cliquer sur « Se connecter ». | Le modal se ferme, le visiteur reste sur la même page et l'en-tête affiche « Bienvenue, [prénom] ». | | |
+| TF-US4-03 | US4 | 1. Ouvrir le modal. 2. Cliquer sur « Se connecter » sans rien saisir. | Un message indique que l'e-mail et le mot de passe sont obligatoires ; aucune connexion n'est tentée. | | |
+| TF-US4-04 | US4 | 1. Ouvrir le modal. 2. Saisir l'e-mail seul, puis cliquer sur « Se connecter ». 3. Recommencer avec le mot de passe seul. | Dans les deux cas, le message « obligatoires » s'affiche et le modal reste ouvert. | | |
+| TF-US4-05 | US4 | 1. Saisir l'e-mail du compte de test et un mauvais mot de passe. 2. Cliquer sur « Se connecter ». | Le message « Email ou mot de passe incorrect » s'affiche, le modal reste ouvert, le champ mot de passe est vidé et reçoit le focus. | | |
+| TF-US4-06 | US4 | 1. Saisir un e-mail inconnu et un mot de passe quelconque. 2. Cliquer sur « Se connecter ». | Le même message « Email ou mot de passe incorrect » s'affiche (rien n'indique si l'e-mail ou le mot de passe est faux). | | |
+| TF-US4-07 | US4 | 1. Se connecter. 2. Naviguer vers « Qui sommes-nous », « Confidentialité » et « Cookies ». | « Bienvenue, [prénom] » reste visible dans l'en-tête sur chaque page. | | |
+| TF-US4-08 | US4 | 1. Se connecter. 2. Recharger la page (F5). | « Bienvenue, [prénom] » s'affiche toujours : la session est retrouvée. | | |
+| TF-US4-09 | US4 | 1. Se connecter. 2. Cliquer de nouveau sur l'icône « Mon compte ». | Le modal de connexion ne s'ouvre plus. | | |
+| TF-US4-10 | US4 | 1. Ouvrir le modal. 2. Fermer successivement avec la croix ✕, avec un clic sur le fond sombre, puis avec la touche Échap. | Le modal se ferme à chaque fois, la page peut de nouveau défiler et le focus revient sur l'icône « Mon compte ». | | |
+| TF-US4-11 | US4 | 1. Ouvrir le modal. 2. Appuyer plusieurs fois sur Tab, puis sur Maj+Tab. | Le focus circule uniquement entre la croix, les deux champs et le bouton ; il ne sort jamais du modal. | | |
+| TF-US4-12 | US4 | 1. Ouvrir le modal. 2. Saisir un mot de passe et observer le champ. 3. Dans les outils de développement (F12, onglet Réseau), observer la réponse de la connexion. | Le mot de passe est masqué à la saisie ; la réponse ne contient que le prénom, le nom et l'e-mail (ni mot de passe ni empreinte). | | |
+| TF-US4-13 | US4 | 1. Arrêter le back. 2. Saisir des identifiants et cliquer sur « Se connecter ». | Un message indique que la connexion est impossible pour le moment ; la page ne plante pas. | | |
+| TF-US4-14 | US4 | 1. Activer un lecteur d'écran (ou observer l'arbre d'accessibilité). 2. Provoquer une erreur de connexion. | Le message d'erreur est annoncé au lecteur d'écran sans déplacer le focus hors du formulaire ; chaque champ est annoncé avec son label. | | |
 
 ## Obligations légales — pages légales
 

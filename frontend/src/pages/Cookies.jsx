@@ -13,7 +13,8 @@ const Cookies = () => {
             <p>
                 À ce jour, le site n'utilise <strong>aucun cookie de mesure d'audience, de publicité ou de traçage</strong>,
                 et aucun service tiers déposant des cookies. Les polices sont hébergées sur notre propre site, sans
-                appel à des serveurs externes.
+                appel à des serveurs externes. Seul un cookie de session, strictement nécessaire, est déposé lorsque
+                vous vous connectez à votre compte.
             </p>
 
             <table className="legal-page__table">
@@ -32,6 +33,13 @@ const Cookies = () => {
                         <td>Stockage local du navigateur (localStorage)</td>
                         <td>Mémoriser votre choix concernant les cookies (accepté ou refusé)</td>
                         <td>Jusqu'à ce que vous l'effaciez ou modifiiez votre choix</td>
+                        <td>Strictement nécessaire : aucun consentement requis</td>
+                    </tr>
+                    <tr>
+                        <td>JSESSIONID</td>
+                        <td>Cookie de session (HttpOnly, Secure en production)</td>
+                        <td>Maintenir votre connexion pendant votre visite</td>
+                        <td>Jusqu'à la fermeture du navigateur ou après une période d'inactivité ; déposé uniquement à la connexion</td>
                         <td>Strictement nécessaire : aucun consentement requis</td>
                     </tr>
                 </tbody>

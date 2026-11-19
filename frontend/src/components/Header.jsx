@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CategoryList from './CategoryList';
+import LoginModal from './LoginModal';
+import useAuth from '../context/useAuth';
 
 // Header : bandeau d'annonce + barre de navigation (logo, catégories, actions)
 // Reçoit : objSelectedCategory (catégorie active ou null), fOnSelectCategory (fonction pour la changer)
@@ -7,6 +10,31 @@ import CategoryList from './CategoryList';
 // Pourquoi : donner un accès permanent aux catégories et au retour à l'accueil
 const Header = ({ objSelectedCategory, fOnSelectCategory }) => {
     const fNavigate = useNavigate();
+    const { objUser } = useAuth();
+    const [blLoginOpen, fSetBlLoginOpen] = useState(false);
+
+    // fHandleAccountClick : ouvre le modal de connexion si personne n'est connecté
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : se connecter depuis n'importe quelle page ; une fois connecté, l'icône n'ouvre plus rien
+    const fHandleAccountClick = () => {
+        if (objUser === null) {
+            fSetBlLoginOpen(true);
+        }
+    };
+
+    // fHandleCloseLogin : ferme le modal de connexion
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : fournir la fonction de fermeture au modal
+    const fHandleCloseLogin = () => {
+        fSetBlLoginOpen(false);
+    };
+
+    let strWelcome = '';
+    if (objUser !== null) {
+        strWelcome = 'Bienvenue, ' + objUser.firstName;
+    }
 
     // fHandleSelectCategory : sélectionne une catégorie et va sur l'accueil
     // Reçoit : objCategory (la catégorie cliquée)
@@ -46,6 +74,9 @@ const Header = ({ objSelectedCategory, fOnSelectCategory }) => {
                     </div>
 
                     <div className="header__actions">
+                        {/* Zone de statut toujours présente : le message est annoncé à l'apparition */}
+                        <p className="header__welcome" role="status">{strWelcome}</p>
+
                         <button type="button" className="header__action" aria-label="Rechercher">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
                                 <circle cx="11" cy="11" r="7"></circle>
@@ -53,7 +84,13 @@ const Header = ({ objSelectedCategory, fOnSelectCategory }) => {
                             </svg>
                         </button>
 
-                        <button type="button" className="header__action" aria-label="Mon compte">
+                        <button
+                            type="button"
+                            className="header__action"
+                            aria-label="Mon compte"
+                            aria-haspopup="dialog"
+                            onClick={fHandleAccountClick}
+                        >
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
                                 <circle cx="12" cy="8" r="4"></circle>
                                 <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path>
@@ -75,6 +112,8 @@ const Header = ({ objSelectedCategory, fOnSelectCategory }) => {
                     </div>
                 </div>
             </header>
+
+            {blLoginOpen && <LoginModal fOnClose={fHandleCloseLogin} />}
         </>
     );
 };

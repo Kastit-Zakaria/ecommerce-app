@@ -1,6 +1,6 @@
 # Guide utilisateur du site SERA
 
-Ce guide explique, pas à pas, comment utiliser le site de la boutique SERA : parcourir les collections, consulter un article, s'inscrire à la newsletter et gérer vos choix en matière de cookies.
+Ce guide explique, pas à pas, comment utiliser le site de la boutique SERA : parcourir les collections, consulter un article, vous connecter, s'inscrire à la newsletter et gérer vos choix en matière de cookies.
 
 ## Sommaire
 
@@ -9,8 +9,9 @@ Ce guide explique, pas à pas, comment utiliser le site de la boutique SERA : pa
 3. [Filtrer par type de vêtement](#3-filtrer-par-type-de-vêtement)
 4. [Consulter une fiche produit](#4-consulter-une-fiche-produit)
 5. [S'inscrire à la newsletter](#5-sinscrire-à-la-newsletter)
-6. [Gérer les cookies](#6-gérer-les-cookies)
-7. [Accéder aux pages légales](#7-accéder-aux-pages-légales)
+6. [Se connecter à son compte](#6-se-connecter-à-son-compte)
+7. [Gérer les cookies](#7-gérer-les-cookies)
+8. [Accéder aux pages légales](#8-accéder-aux-pages-légales)
 
 ---
 
@@ -98,7 +99,7 @@ La fiche présente :
 
 Pour fermer la fiche, cliquez sur la croix en haut de la fenêtre, cliquez en dehors de la fenêtre (sur le fond sombre) ou appuyez sur la touche **Échap** de votre clavier.
 
-> **À savoir :** la commande en ligne n'est pas encore ouverte. Le bouton « Ajouter au panier » est donc grisé sur les fiches. Pour toute question sur un article, contactez la boutique via les coordonnées indiquées dans les [mentions légales](#7-accéder-aux-pages-légales).
+> **À savoir :** la commande en ligne n'est pas encore ouverte. Le bouton « Ajouter au panier » est donc grisé sur les fiches. Pour toute question sur un article, contactez la boutique via les coordonnées indiquées dans les [mentions légales](#8-accéder-aux-pages-légales).
 
 ---
 
@@ -129,7 +130,31 @@ Vos données sont utilisées uniquement pour l'envoi de la newsletter. Pour conn
 
 ---
 
-## 6. Gérer les cookies
+## 6. Se connecter à son compte
+
+Si vous avez un compte, vous pouvez vous connecter depuis n'importe quelle page du site.
+
+1. Cliquez sur l'icône **« Mon compte »** (le bonhomme) en haut à droite de l'en-tête.
+2. Dans la fenêtre **« Connexion »**, saisissez votre **adresse e-mail** (elle sert d'identifiant) et votre **mot de passe**. Les deux champs sont obligatoires.
+3. Cliquez sur **« Se connecter »**. Pendant l'envoi, le bouton affiche « Connexion… ».
+
+Si la connexion réussit, la fenêtre se ferme, vous restez sur la page où vous étiez et l'en-tête affiche **« Bienvenue, » suivi de votre prénom**, sur toutes les pages du site. Si vous rechargez la page, vous restez connecté(e) tant que votre session n'a pas expiré.
+
+Si la connexion n'aboutit pas, un message en rouge s'affiche dans la fenêtre :
+
+| Message affiché | Ce que cela signifie | Que faire |
+|-----------------|----------------------|-----------|
+| « L'email et le mot de passe sont obligatoires. » | Un des deux champs est vide. | Remplissez les deux champs. |
+| « Email ou mot de passe incorrect » | Les identifiants ne correspondent à aucun compte. Par sécurité, le site ne précise pas lequel des deux est faux. | Vérifiez votre saisie, puis recommencez. |
+| « Connexion impossible pour le moment. Veuillez réessayer plus tard. » | Le site ne parvient pas à joindre le serveur. | Réessayez dans quelques instants. |
+
+Vous pouvez fermer la fenêtre avec la croix ✕, en cliquant à côté de la fenêtre ou avec la touche Échap. Au clavier, la touche Tab fait circuler le focus uniquement dans la fenêtre. Une fois connecté(e), l'icône « Mon compte » n'ouvre plus la fenêtre de connexion.
+
+> **À savoir :** la déconnexion et la création de compte ne sont pas encore disponibles.
+
+---
+
+## 7. Gérer les cookies
 
 Lors de votre première visite, un bandeau s'affiche en bas de l'écran : **« Vos choix en matière de cookies »**. Le site n'utilise que les cookies nécessaires à son fonctionnement ; d'autres ne peuvent être utilisés qu'avec votre accord.
 
@@ -153,7 +178,7 @@ Votre choix est mémorisé sur votre appareil : le bandeau ne s'affiche plus lor
 
 ---
 
-## 7. Accéder aux pages légales
+## 8. Accéder aux pages légales
 
 Les pages légales sont accessibles depuis la ligne du bas du pied de page, sur toutes les pages du site.
 

@@ -20,20 +20,40 @@ const Confidentialite = () => {
                 Via le formulaire d'inscription à la newsletter, nous collectons uniquement votre <strong>adresse e-mail</strong>
                 ainsi que la <strong>date de votre consentement</strong>.
             </p>
+            <p>
+                Pour votre compte client, nous traitons votre <strong>prénom</strong>, votre <strong>nom</strong>, votre
+                <strong>adresse e-mail</strong> (qui sert d'identifiant de connexion) et votre <strong>mot de passe</strong>.
+                Le mot de passe n'est jamais conservé en clair : seule une empreinte irréversible (BCrypt) est enregistrée.
+                Lors de la connexion, un identifiant de session est également utilisé (voir la <Link to="/cookies">politique cookies</Link>).
+            </p>
 
             <h2 className="legal-page__heading">3. Finalité</h2>
             <p>Vous envoyer notre newsletter (nouveautés, offres) et conserver la preuve de votre consentement.</p>
+            <p>
+                Données du compte : vous identifier lorsque vous vous connectez, vous accueillir par votre prénom et
+                protéger l'accès à votre compte.
+            </p>
 
             <h2 className="legal-page__heading">4. Base légale</h2>
             <p>
                 Votre consentement (article 6, 1., a) du RGPD), donné en cochant la case prévue à cet effet. La case
                 n'est jamais pré-cochée et l'inscription est impossible sans elle.
             </p>
+            <p>
+                Pour le compte client : l'exécution du service que vous demandez en créant et en utilisant votre compte
+                (article 6, 1., b) du RGPD), ainsi que notre intérêt légitime à sécuriser l'accès au site
+                (article 6, 1., f) du RGPD).
+            </p>
 
             <h2 className="legal-page__heading">5. Durée de conservation</h2>
             <p>
                 Votre adresse est conservée jusqu'au retrait de votre consentement (désinscription) ou, à défaut,
                 3 ans après notre dernier contact avec vous. Elle est ensuite supprimée.
+            </p>
+            <p>
+                Les données du compte sont conservées tant que votre compte est actif, puis supprimées au plus tard
+                3 ans après votre dernière connexion, ou plus tôt à votre demande. La session de connexion, elle, expire
+                à la fermeture du navigateur ou après une période d'inactivité.
             </p>
 
             <h2 className="legal-page__heading">6. Destinataires</h2>

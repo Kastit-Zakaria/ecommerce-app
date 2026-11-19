@@ -1,0 +1,63 @@
+/* Fenêtre de connexion : réutilise le conteneur, le fond, la croix et le bouton de ProductModal */
+.login-modal__dialog {
+    max-width: 440px;
+}
+
+.login-modal__form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 48px 32px 32px;
+}
+
+.login-modal__title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.login-modal__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.login-modal__label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.login-modal__input {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #767676;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 16px;
+}
+
+.login-modal__input:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 2px;
+}
+
+/* La zone d'alerte ne prend pas de place tant qu'elle est vide */
+.login-modal__alert:empty {
+    display: none;
+}
+
+.login-modal__error {
+    margin: 0;
+    padding: 12px;
+    border: 1px solid #b00020;
+    color: #b00020;
+    font-size: 14px;
+}
+
+.login-modal__submit {
+    margin-top: 8px;
+}
