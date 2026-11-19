@@ -285,6 +285,9 @@ CREATE TABLE `users` (
   `id` bigint(20) NOT NULL,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `postal_code` varchar(10) NOT NULL,
+  `city` varchar(100) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `role` varchar(50) NOT NULL DEFAULT 'ROLE_USER'
@@ -478,8 +481,8 @@ ALTER TABLE `product_sizes`
 --
 -- Compte de test pour la connexion (mot de passe hashé en BCrypt)
 --
-INSERT INTO `users` (`first_name`, `last_name`, `email`, `password_hash`, `role`) VALUES
-('Camille', 'Dupont', 'compte.test@exemple.com', '$2a$10$/8tPQ/hEQtkiqI2CtL8tcupn8Mk4ap2ID4UIDr7gbfAPKNWZmzHRe', 'ROLE_USER');
+INSERT INTO `users` (`first_name`, `last_name`, `address`, `postal_code`, `city`, `email`, `password_hash`, `role`) VALUES
+('Camille', 'Dupont', 'Rue de l''Exemple 12', '1000', 'Bruxelles', 'compte.test@exemple.com', '$2a$10$/8tPQ/hEQtkiqI2CtL8tcupn8Mk4ap2ID4UIDr7gbfAPKNWZmzHRe', 'ROLE_USER');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

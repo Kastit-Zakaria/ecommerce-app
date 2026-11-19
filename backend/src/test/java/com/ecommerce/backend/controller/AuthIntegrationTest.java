@@ -47,6 +47,9 @@ class AuthIntegrationTest {
         User objUser = new User();
         objUser.setFirstName("Camille");
         objUser.setLastName("Dupont");
+        objUser.setAddress("Rue de l'Exemple 12");
+        objUser.setPostalCode("1000");
+        objUser.setCity("Bruxelles");
         objUser.setEmail("camille@exemple.com");
         objUser.setPasswordHash(objPasswordEncoder.encode("MotDePasse-1"));
         objUserRepository.save(objUser);
