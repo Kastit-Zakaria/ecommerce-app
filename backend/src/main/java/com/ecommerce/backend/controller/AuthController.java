@@ -32,6 +32,18 @@ public class AuthController {
         }
     }
 
+    // RegisterRequest : corps JSON attendu par l'inscription
+    // { "lastName", "firstName", "address", "postalCode", "city", "email", "password" }
+    // toString est redéfini pour que le mot de passe n'apparaisse jamais dans un log
+    public record RegisterRequest(String lastName, String firstName, String address, String postalCode,
+                                  String city, String email, String password) {
+        @Override
+        public String toString() {
+            return "RegisterRequest[lastName=" + lastName + ", firstName=" + firstName + ", address=" + address
+                    + ", postalCode=" + postalCode + ", city=" + city + ", email=" + email + ", password=***]";
+        }
+    }
+
     // UserResponse : ce que l'API renvoie d'un membre (jamais le mot de passe ni son empreinte)
     public record UserResponse(String firstName, String lastName, String email) {
     }
@@ -61,7 +73,34 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<UserResponse> fLogin(@RequestBody LoginRequest objRequest, HttpServletRequest objHttpRequest) {
         User objUser = objAuthService.fAuthenticate(objRequest.email(), objRequest.password());
+        fOpenSession(objHttpRequest, objUser);
+        return ResponseEntity.ok(fToResponse(objUser));
+    }
 
+    // fRegister : inscrit un visiteur puis le connecte (POST /api/auth/register)
+    // Reçoit : objRequest (les 7 champs du formulaire), objHttpRequest (pour ouvrir la session)
+    // Renvoie : 201 avec { firstName, lastName, email } ; 400 si un champ est vide ou invalide ; 409 si l'email existe déjà
+    // Pourquoi : créer le compte et afficher aussitôt « Bienvenue, <prénom> », sans seconde saisie du mot de passe
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> fRegister(@RequestBody RegisterRequest objRequest, HttpServletRequest objHttpRequest) {
+        User objUser = objAuthService.fRegister(
+                objRequest.lastName(),
+                objRequest.firstName(),
+                objRequest.address(),
+                objRequest.postalCode(),
+                objRequest.city(),
+                objRequest.email(),
+                objRequest.password()
+        );
+        fOpenSession(objHttpRequest, objUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(fToResponse(objUser));
+    }
+
+    // fOpenSession : ouvre une session HTTP neuve pour un membre
+    // Reçoit : objHttpRequest (la requête en cours), objUser (le membre à connecter)
+    // Renvoie : rien
+    // Pourquoi : partager la même ouverture de session entre la connexion et l'inscription
+    private void fOpenSession(HttpServletRequest objHttpRequest, User objUser) {
         // Protection contre la fixation de session : l'ancienne session est détruite, une nouvelle est créée
         HttpSession objOldSession = objHttpRequest.getSession(false);
         if (objOldSession != null) {
@@ -69,8 +108,6 @@ public class AuthController {
         }
         HttpSession objNewSession = objHttpRequest.getSession(true);
         objNewSession.setAttribute(STR_SESSION_USER_ID, objUser.getId());
-
-        return ResponseEntity.ok(fToResponse(objUser));
     }
 
     // fMe : renvoie le membre connecté (GET /api/auth/me)
@@ -111,7 +148,7 @@ public class AuthController {
     }
 
     // fHandleError : transforme l'erreur du service en réponse JSON { "message": "..." }
-    // Reçoit : objException, l'erreur levée (400 ou 401)
+    // Reçoit : objException, l'erreur levée (400, 401 ou 409)
     // Renvoie : la réponse avec le même code HTTP et le message en français
     // Pourquoi : permettre au front d'afficher un message clair
     @ExceptionHandler(ResponseStatusException.class)

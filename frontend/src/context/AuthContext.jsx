@@ -42,6 +42,30 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // fRegister : envoie le formulaire d'inscription à l'API
+    // Reçoit : objForm { lastName, firstName, address, postalCode, city, email, password }
+    // Renvoie : une promesse ; elle échoue avec un Error dont le message est affichable à l'écran
+    //          et dont intStatus porte le code HTTP (0 si le serveur n'a pas répondu)
+    // Pourquoi : créer le compte ; l'API ouvre aussitôt la session, le membre est donc connecté
+    const fRegister = async (objForm) => {
+        try {
+            const objResponse = await objApi.post('/auth/register', objForm);
+            fSetObjUser(objResponse.data);
+        } catch (objError) {
+            let strMessage = 'Inscription impossible pour le moment. Veuillez réessayer plus tard.';
+            let intStatus = 0;
+            if (objError.response) {
+                intStatus = objError.response.status;
+                if (objError.response.data && objError.response.data.message) {
+                    strMessage = objError.response.data.message;
+                }
+            }
+            const objDisplayError = new Error(strMessage);
+            objDisplayError.intStatus = intStatus;
+            throw objDisplayError;
+        }
+    };
+
     // fLogout : demande à l'API de détruire la session, puis oublie le membre
     // Reçoit : rien
     // Renvoie : une promesse ; elle échoue avec un Error affichable si l'API est injoignable
@@ -56,7 +80,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ objUser, blChecking, fLogin, fLogout }}>
+        <AuthContext.Provider value={{ objUser, blChecking, fLogin, fRegister, fLogout }}>
             {children}
         </AuthContext.Provider>
     );

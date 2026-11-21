@@ -192,4 +192,88 @@ class AuthIntegrationTest {
 
         org.junit.jupiter.api.Assertions.assertNotEquals(strOldId, objResult.getRequest().getSession(false).getId());
     }
+
+    // Corps JSON valide pour l'inscription (email à compléter)
+    private static final String STR_REGISTER_BODY = "{\"lastName\":\"Martin\",\"firstName\":\"Alex\","
+            + "\"address\":\"Avenue Louise 5\",\"postalCode\":\"1050\",\"city\":\"Ixelles\","
+            + "\"email\":\"%s\",\"password\":\"MotDePasse-2\"}";
+
+    // fPostRegister : envoie une demande d'inscription
+    // Reçoit : strBody (le JSON à envoyer)
+    // Renvoie : l'action MockMvc prête à vérifier
+    // Pourquoi : éviter de répéter la requête dans chaque test
+    private ResultActions fPostRegister(String strBody) throws Exception {
+        return objMockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(strBody));
+    }
+
+    // fRegister_creeLeCompteEtConnecteLeMembre : inscription valide
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : vérifier le 201, la réponse sans secret, l'enregistrement en base et l'ouverture de la session
+    @Test
+    void fRegister_creeLeCompteEtConnecteLeMembre() throws Exception {
+        MvcResult objResult = fPostRegister(String.format(STR_REGISTER_BODY, "Alex@Exemple.com"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.firstName").value("Alex"))
+                .andExpect(jsonPath("$.lastName").value("Martin"))
+                .andExpect(jsonPath("$.email").value("alex@exemple.com"))
+                .andExpect(jsonPath("$.passwordHash").doesNotExist())
+                .andExpect(content().string(not(containsString("$2"))))
+                .andExpect(content().string(not(containsString("MotDePasse-2"))))
+                .andReturn();
+
+        User objSaved = objUserRepository.findByEmail("alex@exemple.com").orElseThrow();
+        org.junit.jupiter.api.Assertions.assertEquals("Ixelles", objSaved.getCity());
+        org.junit.jupiter.api.Assertions.assertTrue(objPasswordEncoder.matches("MotDePasse-2", objSaved.getPasswordHash()));
+
+        // La session ouverte par l'inscription permet d'être reconnu, comme après une connexion
+        MockHttpSession objSession = (MockHttpSession) objResult.getRequest().getSession(false);
+        objMockMvc.perform(get("/api/auth/me").session(objSession))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Alex"));
+    }
+
+    // fRegister_permetEnsuiteDeSeConnecter : le compte créé fonctionne avec la connexion US4
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : vérifier que l'empreinte enregistrée est bien celle du mot de passe choisi
+    @Test
+    void fRegister_permetEnsuiteDeSeConnecter() throws Exception {
+        fPostRegister(String.format(STR_REGISTER_BODY, "alex@exemple.com"))
+                .andExpect(status().isCreated());
+
+        fPostLogin("{\"email\":\"alex@exemple.com\",\"password\":\"MotDePasse-2\"}")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Alex"));
+    }
+
+    // fRegister_refuseUnEmailDejaUtilise : email du membre de test, avec une autre casse
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : vérifier le 409 et son message
+    @Test
+    void fRegister_refuseUnEmailDejaUtilise() throws Exception {
+        fPostRegister(String.format(STR_REGISTER_BODY, "Camille@Exemple.com"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Un compte existe déjà avec cette adresse e-mail."));
+    }
+
+    // fRegister_refuseLesChampsVidesOuInvalides : champ manquant, email invalide, mot de passe trop court
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : vérifier les 400 et leurs messages
+    @Test
+    void fRegister_refuseLesChampsVidesOuInvalides() throws Exception {
+        fPostRegister("{}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Tous les champs sont obligatoires."));
+        fPostRegister(String.format(STR_REGISTER_BODY, "pas-un-email"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("L'adresse e-mail n'est pas valide."));
+        fPostRegister(String.format(STR_REGISTER_BODY, "alex@exemple.com").replace("MotDePasse-2", "court"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Le mot de passe doit contenir au moins 8 caractères."));
+    }
 }

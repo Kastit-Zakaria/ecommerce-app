@@ -127,7 +127,7 @@ Chaque couche a un rôle précis, et les appels vont toujours dans le même sens
 |--------|------|
 | `entity` | Classes mappées sur les tables (JPA). Elles servent aussi de format JSON des réponses. Les noms d'attributs des entités sont ceux de la base et ne suivent pas le préfixe du standard de codage. |
 | `repository` | Interfaces Spring Data JPA : requêtes sur la base. Les requêtes sont déduites du nom de la méthode (`findByCategoryId`, `findTop8ByOrderByIdDesc`, `existsByEmail`). |
-| `service` | Logique métier et règles : 404 si un produit est inconnu, validation de la newsletter (consentement, format d'e-mail, doublon). |
+| `service` | Logique métier et règles : 404 si un produit est inconnu, validation de la newsletter (consentement, format d'e-mail, doublon), connexion et inscription des membres (`AuthService`). |
 | `controller` | Routes HTTP : reçoit la requête, appelle le service et renvoie la réponse JSON. Le `NewsletterController` convertit les erreurs du service en `{ "message": "..." }`. |
 | `config` | Configuration : `CorsConfig` autorise l'origine du front (avec les cookies) ; `PasswordConfig` déclare l'encodeur BCrypt. |
 
@@ -140,6 +140,7 @@ main.jsx                   Point d'entrée (monte <App />, charge les polices et
 App.jsx                    Composant racine : routes, état partagé
 components/                Composants réutilisables (+ fichiers *.test.jsx)
 context/                   Contexte React (AuthContext : membre connecté)
+hooks/                     Hooks React partagés (useModalBehavior)
 pages/                     Une page par route
 services/                  Appels à l'API
 utils/                     Fonctions utilitaires
@@ -150,9 +151,10 @@ test/setup.js              Configuration commune des tests
 
 | Dossier | Rôle |
 |---------|------|
-| `components/` | Éléments d'interface : `Header`, `CategoryList`, `Footer`, `CookieBanner`, `ProductList`, `ProductModal`, `LoginModal`, `HeroVideo`, `Reassurance`, `Universes`, `EditorialBanner`, `LegalPage`, `ScrollToTop`. |
+| `components/` | Éléments d'interface : `Header`, `CategoryList`, `Footer`, `CookieBanner`, `ProductList`, `ProductModal`, `LoginModal`, `RegisterModal`, `MemberRoute`, `HeroVideo`, `Reassurance`, `Universes`, `EditorialBanner`, `LegalPage`, `ScrollToTop`. |
 | `pages/` | Assemblage des composants pour une route : `Home`, `About`, `MentionsLegales`, `Cgv`, `Confidentialite`, `Cookies`. Les pages légales s'appuient sur le composant `LegalPage`. |
-| `context/` | `AuthContext.jsx` : `AuthProvider` (membre connecté, `fLogin`) ; `useAuth.js` : hook d'accès ; `authContextObject.js` : objet de contexte partagé. Au démarrage, il appelle `GET /api/auth/me` pour retrouver la session. |
+| `context/` | `AuthContext.jsx` : `AuthProvider` (membre connecté, `fLogin`, `fRegister`, `fLogout`) ; `useAuth.js` : hook d'accès ; `authContextObject.js` : objet de contexte partagé. Au démarrage, il appelle `GET /api/auth/me` pour retrouver la session. |
+| `hooks/` | `useModalBehavior.js` : comportement commun aux fenêtres de connexion et d'inscription (focus initial et retour du focus, Échap, piège de Tab, blocage du défilement de la page). |
 | `services/` | `api.js` crée le client Axios partagé (adresse via `VITE_API_URL`, `http://localhost:8080/api` par défaut, `withCredentials: true` pour le cookie de session) ; `newsletter.js` envoie l'inscription. |
 | `utils/` | `formatPrice.js` (prix en euros, locale `fr-BE`) ; `cookieConsent.js` (lecture et écriture du choix de cookies dans `localStorage`, clé `sera-cookie-consent`). |
 | `config/` | `company.js` : informations légales de la société, source unique pour le pied de page et les pages légales. |
@@ -179,11 +181,11 @@ Schéma : `database/ecommercedb.sql` (base `ecommercedb`, MySQL/MariaDB, `utf8mb
 | `sizes` | `id`, `label`, `sort_order` | Tailles, triées par `sort_order` |
 | `product_sizes` | `product_id`, `size_id` | Table de liaison produit ↔ tailles |
 | `newsletter_subscribers` | `id`, `email`, `consent_date` | Inscrits à la newsletter, avec la date du consentement |
-| `users` | `id`, `first_name`, `last_name`, `email` (unique), `password_hash` (BCrypt), `role` (défaut `ROLE_USER`) | Membres, pour la connexion |
+| `users` | `id`, `first_name`, `last_name`, `address`, `postal_code`, `city`, `email` (unique), `password_hash` (BCrypt), `role` (défaut `ROLE_USER`) | Membres : créés par l'inscription, utilisés par la connexion |
 
 ### Tables prévues pour les évolutions futures
 
-Les tables `orders`, `order_items` et `payments` sont **prévues pour les évolutions futures (commandes, paiement), non utilisées par l'application actuelle**. Aucune entité, route ni écran ne les utilise à ce jour. La table `users` est utilisée par la connexion (voir ci-dessus) ; sa structure n'a pas été modifiée.
+Les tables `orders`, `order_items` et `payments` sont **prévues pour les évolutions futures (commandes, paiement), non utilisées par l'application actuelle**. Aucune entité, route ni écran ne les utilise à ce jour. La table `users` est utilisée par l'inscription et la connexion (voir ci-dessus).
 
 | Table | Colonnes principales |
 |-------|----------------------|
@@ -234,6 +236,7 @@ Toutes les routes sont préfixées par `/api`. Les réponses sont en JSON. Aucun
 | `GET` | `/api/products/{id}` | `id` (chemin) : identifiant du produit | Le produit, avec sa catégorie, sa marque, son type et ses tailles | 200, 404 |
 | `POST` | `/api/newsletter` | Corps JSON : `{ "email": "...", "consent": true }` | `{ "message": "Merci, votre inscription est enregistrée." }` | 201, 400, 409 |
 | `POST` | `/api/auth/login` | Corps JSON : `{ "email": "...", "password": "..." }` | `{ "firstName": "...", "lastName": "...", "email": "..." }` et ouverture de la session (cookie `JSESSIONID`) | 200, 400, 401 |
+| `POST` | `/api/auth/register` | Corps JSON : `{ "lastName", "firstName", "address", "postalCode", "city", "email", "password" }` | `{ "firstName": "...", "lastName": "...", "email": "..." }` ; le compte est créé et la session ouverte (le membre est connecté) | 201, 400, 409 |
 | `GET` | `/api/auth/me` | aucun (cookie de session) | Le membre connecté : `{ "firstName", "lastName", "email" }` | 200, 401 |
 
 ### Format d'un produit
@@ -268,6 +271,13 @@ Les clés JSON suivent les noms des attributs de l'entité `Product` :
 | 400 | `POST /api/auth/login` | E-mail ou mot de passe vide ou absent | `{ "message": "L'email et le mot de passe sont obligatoires." }` |
 | 401 | `POST /api/auth/login` | E-mail inconnu **ou** mot de passe incorrect | `{ "message": "Email ou mot de passe incorrect" }` (identique dans les deux cas) |
 | 401 | `GET /api/auth/me` | Pas de session, ou membre supprimé | `{ "message": "Non connecté." }` |
+| 400 | `POST /api/auth/register` | Un des sept champs vide ou absent | `{ "message": "Tous les champs sont obligatoires." }` |
+| 400 | `POST /api/auth/register` | Champ plus long que sa colonne | Par exemple `{ "message": "Le code postal ne doit pas dépasser 10 caractères." }` |
+| 400 | `POST /api/auth/register` | E-mail invalide | `{ "message": "L'adresse e-mail n'est pas valide." }` |
+| 400 | `POST /api/auth/register` | Mot de passe de moins de 8 caractères, ou de plus de 72 octets | `{ "message": "Le mot de passe doit contenir au moins 8 caractères." }` ou `{ "message": "Le mot de passe est trop long." }` |
+| 409 | `POST /api/auth/register` | E-mail déjà utilisé par un membre | `{ "message": "Un compte existe déjà avec cette adresse e-mail." }` |
+
+Règles de l'inscription : les contrôles sont faits dans l'ordre du tableau ci-dessus ; les champs texte sont nettoyés (espaces retirés au début et à la fin) et l'e-mail est mis en minuscules avant la recherche de doublon et l'enregistrement ; le mot de passe n'est pas modifié. Si deux inscriptions simultanées utilisent le même e-mail, l'index unique de la colonne `email` refuse la seconde, qui reçoit aussi le 409.
 
 Règles de la newsletter : le consentement est vérifié avant le format de l'e-mail ; l'adresse est nettoyée (espaces retirés, minuscules) avant la recherche de doublon et l'enregistrement ; la date du consentement est enregistrée.
 
@@ -292,7 +302,7 @@ Déclarées dans `frontend/src/App.jsx` (React Router, `BrowserRouter`).
 
 `Header`, `Footer`, `CookieBanner` et `ScrollToTop` sont affichés quelle que soit la route. `ScrollToTop` remonte en haut à chaque changement de page, sauf si l'adresse contient une ancre (`#produits`), et désactive la restauration automatique du défilement par le navigateur (le bouton Précédent ouvre donc la page en haut). Le défilement vers `#produits` est assuré par `Home`, une fois la section « Nos univers » chargée, car elle modifie la position de la liste des produits en s'affichant.
 
-La connexion n'a pas de route : c'est un modal (`LoginModal`) ouvert par l'icône « Mon compte » du `Header`, depuis n'importe quelle page. `AuthProvider` enveloppe toute l'application, ce qui permet au `Header` d'afficher « Bienvenue, [prénom] » sur toutes les routes.
+La connexion et l'inscription n'ont pas de route : ce sont deux modals (`LoginModal`, `RegisterModal`) ouverts depuis l'icône « Mon compte » du `Header`, depuis n'importe quelle page. Le lien « Créer un compte » de la connexion ouvre l'inscription, et le lien « Se connecter » de l'inscription revient à la connexion ; le `Header` n'affiche jamais les deux à la fois. `AuthProvider` enveloppe toute l'application, ce qui permet au `Header` d'afficher « Bienvenue, [prénom] » sur toutes les routes.
 
 Il n'y a pas de route dédiée pour une catégorie ou un produit : la catégorie choisie est un état de `App`, et la fiche produit est un modal de `Home`. Une adresse inconnue n'affiche que l'en-tête et le pied de page (aucune route « 404 » n'est déclarée).
 
@@ -364,18 +374,18 @@ Résumé des règles de `CLAUDE.md`, qui constitue la définition du fini.
 | Outils | JUnit (Spring Boot Test), H2 en mémoire | Vitest, Testing Library, jsdom |
 | Emplacement | `backend/src/test/java/com/ecommerce/backend/` | Fichiers `*.test.jsx` / `*.test.js` à côté du code, dans `frontend/src/` |
 | Commande | `cd backend` puis `./mvnw test` (`mvnw.cmd test` sous Windows) | `cd frontend` puis `npm test` |
-| Nombre de tests | **34** | **46** |
+| Nombre de tests | **47** | **76** |
 
-**Backend (34 tests)** : `BackendApplicationTests` (1, démarrage du contexte), `ApiIntegrationTest` (6), `NewsletterIntegrationTest` (4) et `AuthIntegrationTest` (7, MockMvc : succès, champs vides, mauvais mot de passe, e-mail inconnu, `me` sans session et avec session, renouvellement de la session) pour les routes, `CategoryServiceTest` (2), `ProductServiceTest` (5), `NewsletterServiceTest` (4) et `AuthServiceTest` (5) pour les services. La base de test est H2 en mémoire (mode MySQL, schéma recréé à chaque exécution) : **elle ne touche jamais à MySQL**.
+**Backend (47 tests)** : `BackendApplicationTests` (1, démarrage du contexte), `ApiIntegrationTest` (6), `NewsletterIntegrationTest` (4) et `AuthIntegrationTest` (13, MockMvc : connexion, `me`, déconnexion, renouvellement de la session ; inscription réussie avec session ouverte, connexion avec le compte créé, e-mail déjà utilisé, champs vides ou invalides) pour les routes, `CategoryServiceTest` (2), `ProductServiceTest` (5), `NewsletterServiceTest` (4) et `AuthServiceTest` (12 : connexion ; inscription avec empreinte BCrypt, champ vide, e-mail invalide, mot de passe trop court ou trop long, champ trop long, doublon, doublon détecté par la base) pour les services. La base de test est H2 en mémoire (mode MySQL, schéma recréé à chaque exécution) : **elle ne touche jamais à MySQL**.
 
-**Frontend (46 tests, 10 fichiers)** : `CategoryList` (3), `ProductList` (5), `ProductModal` (5), `Footer` (5), `CookieBanner` (5), `ScrollToTop` (3), `Home` (3), `formatPrice` (3), `LoginModal` (10 : labels et attributs, champs obligatoires, message d'erreur, état de chargement, piège du focus, fermeture, retour du focus) et `Header` (4 : affichage de « Bienvenue », session retrouvée, icône compte une fois connecté).
+**Frontend (76 tests, 12 fichiers)** : `CategoryList` (3), `ProductList` (5), `ProductModal` (5), `Footer` (5), `CookieBanner` (5), `ScrollToTop` (3), `Home` (3), `formatPrice` (3), `MonCompte` (7), `LoginModal` (10 : labels et attributs, champs obligatoires, message d'erreur, état de chargement, piège du focus, fermeture, retour du focus), `RegisterModal` (12 : sept champs obligatoires et leurs attributs, focus initial, champ manquant, e-mail invalide, mot de passe trop court, envoi des champs nettoyés, e-mail déjà utilisé, serveur injoignable, état de chargement, lien vers la connexion, piège du focus, fermeture) et `Header` (15 : « Bienvenue », session retrouvée, panneau du compte, déconnexion, passage connexion ↔ inscription, bienvenue après l'inscription).
 
 Autres contrôles :
 
 - `npm run lint` : analyse statique avec oxlint.
 - [`docs/tests-fonctionnels.md`](tests-fonctionnels.md) : cahier de tests manuels (parcours utilisateur, accessibilité), avec les colonnes « résultat obtenu » et « statut » à remplir.
 
-Dernière exécution à la rédaction de ce document : 46/46 tests frontend et 34/34 tests backend réussis.
+Dernière exécution à la rédaction de ce document : 76/76 tests frontend et 47/47 tests backend réussis.
 
 ---
 
@@ -418,6 +428,17 @@ Variables d'environnement, avec leurs valeurs par défaut de développement :
 6. Le front mémorise le membre dans `AuthContext`, ferme le modal et le `Header` affiche « Bienvenue, [prénom] ».
 7. Après un rechargement, l'étape 1 retrouve le membre grâce au cookie.
 
+### Flux d'une inscription
+
+1. Dans `LoginModal`, le lien « Créer un compte » remplace la fenêtre de connexion par `RegisterModal`.
+2. Le visiteur saisit son nom, son prénom, son adresse, son code postal, sa ville, son e-mail et un mot de passe d'au moins 8 caractères. Le front refait les contrôles de l'API (champs obligatoires, format de l'e-mail, longueur du mot de passe) pour éviter un aller-retour inutile, et place le focus sur le champ à corriger.
+3. Le front envoie `POST /api/auth/register`, en HTTPS en production.
+4. `AuthService.fRegister` applique toutes les règles (voir [Codes d'erreur](#codes-derreur)), calcule l'empreinte BCrypt du mot de passe et enregistre le membre avec le rôle `ROLE_USER`.
+5. `AuthController` ouvre une session neuve, exactement comme après une connexion (même méthode `fOpenSession`), et répond 201 avec `{ firstName, lastName, email }`.
+6. Le front mémorise le membre dans `AuthContext`, ferme le modal et le `Header` affiche « Bienvenue, [prénom] » sur toutes les pages.
+
+Le message 409 indique qu'un compte existe déjà pour cet e-mail : il est nécessaire pour que le visiteur comprenne le refus, mais il permet de savoir si une adresse est inscrite. Ce risque est accepté ici ; la limitation des tentatives recommandée plus bas le réduit aussi.
+
 ### BCrypt côté serveur
 
 Les mots de passe ne sont jamais stockés ni comparés en clair. La colonne `password_hash` contient une empreinte BCrypt (`BCryptPasswordEncoder` de la dépendance `spring-security-crypto` seule, sans le reste de Spring Security). BCrypt est conçu pour les mots de passe : il intègre un **sel aléatoire** propre à chaque empreinte (deux mots de passe identiques donnent deux empreintes différentes) et un **coût de calcul volontairement élevé** qui ralentit les attaques par force brute en cas de fuite de la base. Pour un e-mail inconnu, le service effectue tout de même un calcul BCrypt factice afin que le temps de réponse ne révèle pas si le compte existe.
@@ -433,16 +454,17 @@ Hasher le mot de passe dans le navigateur avant de l'envoyer n'apporte aucune s�
 ### Session HTTP, fixation de session et cookie HttpOnly
 
 - L'authentification repose sur la session HTTP du serveur : seul un identifiant opaque (`JSESSIONID`) circule dans le cookie, le serveur garde l'identité du membre.
-- **Fixation de session** : lors d'une connexion réussie, l'ancienne session est invalidée et une nouvelle est créée. Un identifiant de session connu d'avance d'un attaquant ne devient donc jamais une session authentifiée (testé par `fLogin_renouvelleLaSession`).
+- **Fixation de session** : lors d'une connexion ou d'une inscription réussie, l'ancienne session est invalidée et une nouvelle est créée. Un identifiant de session connu d'avance d'un attaquant ne devient donc jamais une session authentifiée (testé par `fLogin_renouvelleLaSession`).
 - **Cookie `HttpOnly`** : le cookie est inaccessible au JavaScript de la page, ce qui empêche un script injecté (XSS) de le voler. Il est aussi `SameSite=Lax` et `Secure` en production (`application.properties`).
-- Le cookie n'est créé qu'à la connexion réussie : une tentative échouée ne dépose rien.
+- Le cookie n'est créé qu'à la connexion ou à l'inscription réussie : une tentative échouée ne dépose rien.
 
 ### Mot de passe : ce qui n'est jamais fait
 
-- Il n'est **jamais écrit dans les logs** : aucun log applicatif ne le reçoit et `LoginRequest.toString()` le masque (`password=***`).
+- Il n'est **jamais écrit dans les logs** : aucun log applicatif ne le reçoit et `LoginRequest.toString()` comme `RegisterRequest.toString()` le masquent (`password=***`).
 - Il n'est **jamais renvoyé dans une réponse JSON** : `AuthController` renvoie un objet dédié (`UserResponse`), pas l'entité `User`, donc `password_hash` ne sort pas non plus.
 - Il n'est **pas conservé dans le state React** après l'envoi : le champ est vidé dès la réponse (succès ou échec) et `AuthContext` ne mémorise que le prénom, le nom et l'e-mail.
-- Les champs utilisent `type="password"` / `autocomplete="current-password"` et `type="email"` / `autocomplete="username"`, pour que les gestionnaires de mots de passe fonctionnent.
+- Les champs utilisent `type="password"` / `autocomplete="current-password"` et `type="email"` / `autocomplete="username"` à la connexion, `autocomplete="new-password"` à l'inscription, pour que les gestionnaires de mots de passe fonctionnent (et proposent un mot de passe robuste à l'inscription).
+- Il ne dépasse pas **72 octets** : BCrypt ignore tout ce qui suit, un mot de passe plus long serait donc tronqué sans le dire. L'inscription le refuse.
 
 ### Compte de test
 

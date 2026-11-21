@@ -216,3 +216,49 @@ describe('Header (dropdown du compte)', () => {
         expect(screen.getByRole('button', { name: 'Se déconnecter' })).toBeInTheDocument();
     });
 });
+
+describe('Header (inscription)', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it("passe de la connexion à l'inscription et inversement", async () => {
+        fMockApi(null);
+        fRenderHeader();
+
+        await userEvent.click(await screen.findByRole('button', { name: 'Mon compte' }));
+        await userEvent.click(screen.getByRole('button', { name: 'Créer un compte' }));
+
+        expect(screen.getByRole('dialog', { name: 'Créer un compte' })).toBeInTheDocument();
+        expect(screen.queryByRole('dialog', { name: 'Connexion' })).not.toBeInTheDocument();
+        expect(screen.getByLabelText('Nom')).toHaveFocus();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
+
+        expect(screen.getByRole('dialog', { name: 'Connexion' })).toBeInTheDocument();
+        expect(screen.queryByRole('dialog', { name: 'Créer un compte' })).not.toBeInTheDocument();
+    });
+
+    it("affiche « Bienvenue, <prénom> » dès l'inscription réussie et rend le focus à l'icône compte", async () => {
+        fMockApi(null);
+        objApi.post.mockResolvedValue({ data: { firstName: 'Alex', lastName: 'Martin', email: 'alex@exemple.com' } });
+        fRenderHeader();
+
+        const objAccount = await screen.findByRole('button', { name: 'Mon compte' });
+        await userEvent.click(objAccount);
+        await userEvent.click(screen.getByRole('button', { name: 'Créer un compte' }));
+
+        await userEvent.type(screen.getByLabelText('Nom'), 'Martin');
+        await userEvent.type(screen.getByLabelText('Prénom'), 'Alex');
+        await userEvent.type(screen.getByLabelText('Adresse'), 'Avenue Louise 5');
+        await userEvent.type(screen.getByLabelText('Code postal'), '1050');
+        await userEvent.type(screen.getByLabelText('Ville'), 'Ixelles');
+        await userEvent.type(screen.getByLabelText('Adresse e-mail'), 'alex@exemple.com');
+        await userEvent.type(screen.getByLabelText('Mot de passe'), 'MotDePasse-2');
+        await userEvent.click(screen.getByRole('button', { name: 'Créer mon compte' }));
+
+        expect(await screen.findByText('Bienvenue, Alex')).toBeInTheDocument();
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(objAccount).toHaveFocus();
+    });
+});

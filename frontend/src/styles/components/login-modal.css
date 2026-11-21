@@ -1,4 +1,4 @@
-/* Fenêtre de connexion : réutilise le conteneur, le fond, la croix et le bouton de ProductModal */
+/* Fenêtres de connexion et d'inscription : réutilisent le conteneur, le fond, la croix et le bouton de ProductModal */
 .login-modal__dialog {
     max-width: 440px;
 }
@@ -60,4 +60,55 @@
 
 .login-modal__submit {
     margin-top: 8px;
+}
+
+/* Lien « Créer un compte » / « Se connecter » sous le bouton principal */
+.login-modal__switch {
+    margin: 0;
+    font-size: 14px;
+    text-align: center;
+}
+
+.login-modal__link {
+    min-height: 44px;
+    padding: 0 4px;
+    border: none;
+    background: none;
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.login-modal__link:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 2px;
+}
+
+/* Inscription : rappel des champs obligatoires, aide sous le mot de passe et mention de confidentialité */
+.register-modal__intro,
+.register-modal__hint,
+.register-modal__privacy {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 13px;
+}
+
+.register-modal__privacy a {
+    color: var(--color-text);
+}
+
+/* Code postal et ville sur une même ligne (code postal plus étroit) */
+.register-modal__row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 16px;
+}
+
+@media (max-width: 480px) {
+    .register-modal__row {
+        grid-template-columns: 1fr;
+    }
 }
