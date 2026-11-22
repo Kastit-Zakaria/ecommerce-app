@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import CategoryList from './CategoryList';
 import LoginModal from './LoginModal';
+import RegisterModal from './RegisterModal';
 import useAuth from '../context/useAuth';
 
 // Header : bandeau d'annonce + barre de navigation (logo, catégories, actions)
@@ -12,7 +13,8 @@ const Header = ({ objSelectedCategory, fOnSelectCategory }) => {
     const fNavigate = useNavigate();
     const objLocation = useLocation();
     const { objUser, fLogout } = useAuth();
-    const [blLoginOpen, fSetBlLoginOpen] = useState(false);
+    // Fenêtre d'authentification ouverte : '' (aucune), 'login' (connexion) ou 'register' (inscription)
+    const [strAuthModal, fSetStrAuthModal] = useState('');
     const [blMenuOpen, fSetBlMenuOpen] = useState(false);
     const [strLogoutError, fSetStrLogoutError] = useState('');
 
@@ -90,7 +92,7 @@ const Header = ({ objSelectedCategory, fOnSelectCategory }) => {
     // Pourquoi : se connecter ou accéder aux options du compte depuis n'importe quelle page
     const fHandleAccountClick = () => {
         if (objUser === null) {
-            fSetBlLoginOpen(true);
+            fSetStrAuthModal('login');
         } else if (blMenuOpen) {
             fCloseMenu(true);
         } else {
@@ -112,16 +114,22 @@ const Header = ({ objSelectedCategory, fOnSelectCategory }) => {
         }
     };
 
-    // fHandleCloseLogin : ferme le modal de connexion
+    // fHandleCloseAuthModal : ferme la fenêtre de connexion ou d'inscription
     // Reçoit : rien
     // Renvoie : rien
-    // Pourquoi : fournir la fonction de fermeture au modal
-    const fHandleCloseLogin = () => {
-        fSetBlLoginOpen(false);
+    // Pourquoi : fournir la fonction de fermeture aux deux modals
+    const fHandleCloseAuthModal = () => {
+        fSetStrAuthModal('');
         if (blLoginRequested) {
             fNavigate(objLocation.pathname, { replace: true, state: null });
         }
     };
+
+    // Fenêtre à afficher : celle demandée par l'icône ou les liens, sinon la connexion demandée par une page de membre
+    let strShownModal = strAuthModal;
+    if (strShownModal === '' && blLoginRequested) {
+        strShownModal = 'login';
+    }
 
     // Attributs ARIA du bouton compte : modal pour un visiteur, disclosure (aria-expanded + aria-controls) pour un membre
     const objAccountAria = {};
@@ -244,7 +252,18 @@ const Header = ({ objSelectedCategory, fOnSelectCategory }) => {
                 </div>
             </header>
 
-            {(blLoginOpen || blLoginRequested) && <LoginModal fOnClose={fHandleCloseLogin} />}
+            {strShownModal === 'login' && (
+                <LoginModal
+                    fOnClose={fHandleCloseAuthModal}
+                    fOnSwitchToRegister={() => fSetStrAuthModal('register')}
+                />
+            )}
+            {strShownModal === 'register' && (
+                <RegisterModal
+                    fOnClose={fHandleCloseAuthModal}
+                    fOnSwitchToLogin={() => fSetStrAuthModal('login')}
+                />
+            )}
         </>
     );
 };

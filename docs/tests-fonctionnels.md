@@ -3,7 +3,7 @@
 **Dernière exécution : 2 novembre 2026** (historique en fin de document)
 
 - Environnement : local, Windows 11, Chromium 156.0.8078.4. Site sur http://localhost:5173, API sur http://localhost:8080, base MySQL locale.
-- Résumé de la dernière exécution : **47 OK / 0 KO** sur 47 scénarios. Les 14 scénarios TF-US4-xx (connexion) et les 16 scénarios TF-US7-xx (déconnexion, page Mon compte) ont été ajoutés depuis : à exécuter.
+- Résumé de la dernière exécution : **47 OK / 0 KO** sur 47 scénarios. Les 14 scénarios TF-US4-xx (connexion) et les 16 scénarios TF-US7-xx (déconnexion, page Mon compte) ont été ajoutés depuis, ainsi que les 14 scénarios TF-US5-xx (inscription) : à exécuter.
 - Limite connue : dans la fiche produit, le focus n'est pas piégé dans la fenêtre (voir TA-04).
 
 Prérequis : MySQL (XAMPP) démarré, back lancé (`./mvnw spring-boot:run`), front lancé (`npm run dev`), page d'accueil ouverte dans le navigateur.
@@ -56,6 +56,27 @@ Prérequis : le compte de test de `database/ecommercedb.sql` est présent dans l
 | TF-US4-12 | US4 | 1. Ouvrir le modal. 2. Saisir un mot de passe et observer le champ. 3. Dans les outils de développement (F12, onglet Réseau), observer la réponse de la connexion. | Le mot de passe est masqué à la saisie ; la réponse ne contient que le prénom, le nom et l'e-mail (ni mot de passe ni empreinte). | | |
 | TF-US4-13 | US4 | 1. Arrêter le back. 2. Saisir des identifiants et cliquer sur « Se connecter ». | Un message indique que la connexion est impossible pour le moment ; la page ne plante pas. | | |
 | TF-US4-14 | US4 | 1. Activer un lecteur d'écran (ou observer l'arbre d'accessibilité). 2. Provoquer une erreur de connexion. | Le message d'erreur est annoncé au lecteur d'écran sans déplacer le focus hors du formulaire ; chaque champ est annoncé avec son label. | | |
+
+## US5 — Inscription
+
+Prérequis : être déconnecté. Utiliser une adresse e-mail qui n'a encore aucun compte (par exemple `nouveau.membre@exemple.com`) ; après les tests, supprimer ce compte de la table `users` si nécessaire.
+
+| ID | US | Étapes | Résultat attendu | Résultat obtenu | Statut |
+|----|----|--------|------------------|-----------------|--------|
+| TF-US5-01 | US5 | 1. Sur l'accueil, cliquer sur l'icône « Mon compte ». 2. Cliquer sur « Créer un compte ». | La fenêtre « Connexion » est remplacée par la fenêtre « Créer un compte », avec les champs Nom, Prénom, Adresse, Code postal, Ville, Adresse e-mail et Mot de passe ; le focus est sur « Nom ». | | |
+| TF-US5-02 | US5 | 1. Aller sur « Qui sommes-nous », puis sur « Cookies ». 2. Sur chaque page, ouvrir l'inscription comme au scénario précédent. | L'inscription s'ouvre depuis chaque page, sans quitter la page. | | |
+| TF-US5-03 | US5 | 1. Ouvrir l'inscription. 2. Remplir les sept champs avec des valeurs valides (mot de passe de 8 caractères ou plus). 3. Cliquer sur « Créer mon compte ». | La fenêtre se ferme, le visiteur reste sur la même page et l'en-tête affiche « Bienvenue, [prénom saisi] ». | | |
+| TF-US5-04 | US5 | 1. Après le scénario précédent, naviguer vers deux autres pages. 2. Recharger la page (F5). | « Bienvenue, [prénom] » reste affiché sur chaque page et après le rechargement. | | |
+| TF-US5-05 | US5 | 1. Se déconnecter. 2. Se connecter avec l'e-mail et le mot de passe choisis à l'inscription. | La connexion réussit et « Bienvenue, [prénom] » s'affiche. | | |
+| TF-US5-06 | US5 | 1. Ouvrir l'inscription. 2. Cliquer sur « Créer mon compte » sans rien saisir. | Le message « Tous les champs sont obligatoires. » s'affiche et le focus va sur « Nom » ; aucun compte n'est créé. | | |
+| TF-US5-07 | US5 | 1. Remplir tous les champs sauf « Ville ». 2. Cliquer sur « Créer mon compte ». 3. Recommencer en laissant vide un autre champ (par exemple « Adresse »). | Le message « Tous les champs sont obligatoires. » s'affiche et le focus va sur le champ vide ; les autres champs gardent leur valeur. | | |
+| TF-US5-08 | US5 | 1. Remplir tous les champs avec un e-mail sans arobase (par exemple `nouveau.exemple.com`). 2. Cliquer sur « Créer mon compte ». | Le message « L'adresse e-mail n'est pas valide. » s'affiche et le focus va sur l'e-mail. | | |
+| TF-US5-09 | US5 | 1. Remplir tous les champs avec un mot de passe de 7 caractères. 2. Cliquer sur « Créer mon compte ». | Le message « Le mot de passe doit contenir au moins 8 caractères. » s'affiche et le focus va sur le mot de passe. | | |
+| TF-US5-10 | US5 | 1. Remplir tous les champs avec l'e-mail du compte de test (`compte.test@exemple.com`), en majuscules. 2. Cliquer sur « Créer mon compte ». | Le message « Un compte existe déjà avec cette adresse e-mail. » s'affiche ; le focus va sur l'e-mail ; le mot de passe est vidé, les autres champs sont conservés ; aucun second compte n'est créé. | | |
+| TF-US5-11 | US5 | 1. Dans la fenêtre d'inscription, cliquer sur « Se connecter ». | La fenêtre « Connexion » remplace l'inscription. | | |
+| TF-US5-12 | US5 | 1. Ouvrir l'inscription. 2. Fermer avec la croix ✕, puis avec un clic sur le fond sombre, puis avec Échap. 3. Rouvrir et appuyer plusieurs fois sur Tab, puis Maj+Tab. | La fenêtre se ferme à chaque fois et le focus revient sur l'icône « Mon compte » ; le focus ne sort jamais de la fenêtre avec Tab. | | |
+| TF-US5-13 | US5 | 1. Réussir une inscription. 2. Dans phpMyAdmin, afficher la ligne du nouveau membre dans `users`. 3. Dans les outils de développement (F12, onglet Réseau), observer la réponse de « register ». | En base, `password_hash` commence par `$2a$` (empreinte BCrypt, jamais le mot de passe en clair) et l'e-mail est en minuscules ; la réponse (code 201) ne contient que le prénom, le nom et l'e-mail. | | |
+| TF-US5-14 | US5 | 1. Arrêter le back. 2. Remplir l'inscription et cliquer sur « Créer mon compte ». | Le message « Inscription impossible pour le moment. Veuillez réessayer plus tard. » s'affiche ; la page ne plante pas. | | |
 
 ## US7 — Déconnexion et page Mon compte
 

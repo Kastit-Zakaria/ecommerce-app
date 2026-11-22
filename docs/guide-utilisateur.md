@@ -1,6 +1,6 @@
 # Guide utilisateur du site SERA
 
-Ce guide explique, pas à pas, comment utiliser le site de la boutique SERA : parcourir les collections, consulter un article, vous connecter, s'inscrire à la newsletter et gérer vos choix en matière de cookies.
+Ce guide explique, pas à pas, comment utiliser le site de la boutique SERA : parcourir les collections, consulter un article, créer votre compte et vous connecter, s'inscrire à la newsletter et gérer vos choix en matière de cookies.
 
 ## Sommaire
 
@@ -9,7 +9,7 @@ Ce guide explique, pas à pas, comment utiliser le site de la boutique SERA : pa
 3. [Filtrer par type de vêtement](#3-filtrer-par-type-de-vêtement)
 4. [Consulter une fiche produit](#4-consulter-une-fiche-produit)
 5. [S'inscrire à la newsletter](#5-sinscrire-à-la-newsletter)
-6. [Se connecter à son compte](#6-se-connecter-à-son-compte)
+6. [Créer un compte et se connecter](#6-créer-un-compte-et-se-connecter)
 7. [Gérer les cookies](#7-gérer-les-cookies)
 8. [Accéder aux pages légales](#8-accéder-aux-pages-légales)
 
@@ -130,7 +130,37 @@ Vos données sont utilisées uniquement pour l'envoi de la newsletter. Pour conn
 
 ---
 
-## 6. Se connecter à son compte
+## 6. Créer un compte et se connecter
+
+### Créer un compte
+
+Vous pouvez créer votre compte client depuis n'importe quelle page du site. Un compte n'est pas nécessaire pour consulter les collections.
+
+1. Cliquez sur l'icône **« Mon compte »** (le bonhomme) en haut à droite de l'en-tête.
+2. En bas de la fenêtre **« Connexion »**, cliquez sur **« Créer un compte »**.
+3. Dans la fenêtre **« Créer un compte »**, remplissez les sept champs. **Tous sont obligatoires** :
+   - **Nom** et **Prénom** ;
+   - **Adresse** (rue et numéro), **Code postal** et **Ville** ;
+   - **Adresse e-mail** : elle vous servira d'identifiant pour vous connecter ;
+   - **Mot de passe** : **8 caractères minimum**. Votre navigateur peut vous en proposer un.
+4. Cliquez sur **« Créer mon compte »**. Pendant l'envoi, le bouton affiche « Création… ».
+
+Si l'inscription réussit, la fenêtre se ferme et **vous êtes directement connecté(e)** : l'en-tête affiche **« Bienvenue, » suivi de votre prénom**, sur toutes les pages du site. Vous n'avez pas besoin de vous connecter une seconde fois.
+
+Si l'inscription n'aboutit pas, un message en rouge s'affiche dans la fenêtre et le curseur se place sur le champ à corriger. Les champs déjà remplis sont conservés, sauf le mot de passe, à ressaisir par sécurité.
+
+| Message affiché | Ce que cela signifie | Que faire |
+|-----------------|----------------------|-----------|
+| « Tous les champs sont obligatoires. » | Au moins un champ est vide. | Remplissez le champ indiqué par le curseur. |
+| « L'adresse e-mail n'est pas valide. » | L'adresse saisie n'a pas la forme nom@domaine.be. | Corrigez l'adresse e-mail. |
+| « Le mot de passe doit contenir au moins 8 caractères. » | Le mot de passe est trop court. | Choisissez un mot de passe plus long. |
+| « Le mot de passe est trop long. » | Le mot de passe dépasse la longueur acceptée. | Choisissez un mot de passe plus court. |
+| « Un compte existe déjà avec cette adresse e-mail. » | Un compte a déjà été créé avec cette adresse : deux comptes ne peuvent pas partager la même adresse e-mail. | Connectez-vous avec cette adresse, ou utilisez-en une autre. |
+| « Inscription impossible pour le moment. Veuillez réessayer plus tard. » | Le site ne parvient pas à joindre le serveur. | Réessayez dans quelques instants. |
+
+Si vous avez déjà un compte, le lien **« Se connecter »**, en bas de la fenêtre, vous ramène à la connexion. Pour savoir comment vos données sont utilisées, consultez la page **Confidentialité** (lien dans la fenêtre d'inscription et dans le pied de page).
+
+### Se connecter
 
 Si vous avez un compte, vous pouvez vous connecter depuis n'importe quelle page du site.
 
@@ -148,9 +178,7 @@ Si la connexion n'aboutit pas, un message en rouge s'affiche dans la fenêtre :
 | « Email ou mot de passe incorrect » | Les identifiants ne correspondent à aucun compte. Par sécurité, le site ne précise pas lequel des deux est faux. | Vérifiez votre saisie, puis recommencez. |
 | « Connexion impossible pour le moment. Veuillez réessayer plus tard. » | Le site ne parvient pas à joindre le serveur. | Réessayez dans quelques instants. |
 
-Vous pouvez fermer la fenêtre avec la croix ✕, en cliquant à côté de la fenêtre ou avec la touche Échap. Au clavier, la touche Tab fait circuler le focus uniquement dans la fenêtre. Une fois connecté(e), l'icône « Mon compte » n'ouvre plus la fenêtre de connexion.
-
-> **À savoir :** la déconnexion et la création de compte ne sont pas encore disponibles.
+Vous pouvez fermer la fenêtre de connexion ou d'inscription avec la croix ✕, en cliquant à côté de la fenêtre ou avec la touche Échap. Au clavier, la touche Tab fait circuler le focus uniquement dans la fenêtre. Une fois connecté(e), l'icône « Mon compte » n'ouvre plus la fenêtre de connexion.
 
 ---
 

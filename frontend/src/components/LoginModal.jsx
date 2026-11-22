@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import useAuth from '../context/useAuth';
+import useModalBehavior from '../hooks/useModalBehavior';
 
 // LoginModal : fenêtre de connexion (email = login + mot de passe)
-// Reçoit : fOnClose (fonction pour fermer le modal)
+// Reçoit : fOnClose (fonction pour fermer le modal),
+//          fOnSwitchToRegister (facultative : affiche le lien « Créer un compte » qui ouvre l'inscription)
 // Renvoie : le JSX du modal
 // Pourquoi : permettre de se connecter depuis n'importe quelle page sans la quitter
-const LoginModal = ({ fOnClose }) => {
+const LoginModal = ({ fOnClose, fOnSwitchToRegister }) => {
     const { fLogin } = useAuth();
 
     const [strEmail, fSetStrEmail] = useState('');
@@ -17,63 +19,8 @@ const LoginModal = ({ fOnClose }) => {
     const objEmailRef = useRef(null);
     const objPasswordRef = useRef(null);
 
-    // 0. Focus : entrer sur le champ email à l'ouverture, revenir à l'icône compte à la fermeture
-    useEffect(() => {
-        const objPreviousFocus = document.activeElement;
-        objEmailRef.current.focus();
-
-        // Nettoyage : exécuté à la fermeture du modal
-        return () => {
-            if (objPreviousFocus !== null && objPreviousFocus.focus) {
-                objPreviousFocus.focus();
-            }
-        };
-    }, []);
-
-    // 1. Échap ferme le modal, Tab reste dans le modal, la page ne défile plus
-    useEffect(() => {
-        // fHandleKeyDown : gère Échap et le piège du focus
-        // Reçoit : objEvent (l'événement clavier)
-        // Renvoie : rien
-        // Pourquoi : fermer au clavier et empêcher Tab de sortir de la fenêtre
-        const fHandleKeyDown = (objEvent) => {
-            if (objEvent.key === 'Escape') {
-                fOnClose();
-                return;
-            }
-
-            if (objEvent.key !== 'Tab') {
-                return;
-            }
-
-            const tbFocusables = objDialogRef.current.querySelectorAll('button:not([disabled]), input:not([disabled])');
-            if (tbFocusables.length === 0) {
-                return;
-            }
-
-            const objFirst = tbFocusables[0];
-            const objLast = tbFocusables[tbFocusables.length - 1];
-            const objActive = document.activeElement;
-            const blInside = objDialogRef.current.contains(objActive);
-
-            if (objEvent.shiftKey && (objActive === objFirst || !blInside)) {
-                objEvent.preventDefault();
-                objLast.focus();
-            } else if (!objEvent.shiftKey && (objActive === objLast || !blInside)) {
-                objEvent.preventDefault();
-                objFirst.focus();
-            }
-        };
-
-        document.addEventListener('keydown', fHandleKeyDown);
-        document.body.style.overflow = 'hidden';
-
-        // Nettoyage : exécuté à la fermeture du modal
-        return () => {
-            document.removeEventListener('keydown', fHandleKeyDown);
-            document.body.style.overflow = '';
-        };
-    }, [fOnClose]);
+    // Focus initial sur l'email, retour du focus, Échap, piège de Tab et blocage du défilement
+    useModalBehavior(objDialogRef, objEmailRef, fOnClose);
 
     // fHandleSubmit : envoie le formulaire
     // Reçoit : objEvent (l'événement de soumission)
@@ -168,6 +115,15 @@ const LoginModal = ({ fOnClose }) => {
                     <button type="submit" className="product-modal__add login-modal__submit" disabled={blLoading}>
                         {strSubmitLabel}
                     </button>
+
+                    {fOnSwitchToRegister && (
+                        <p className="login-modal__switch">
+                            Pas encore de compte ?{' '}
+                            <button type="button" className="login-modal__link" onClick={fOnSwitchToRegister}>
+                                Créer un compte
+                            </button>
+                        </p>
+                    )}
                 </form>
             </div>
         </div>

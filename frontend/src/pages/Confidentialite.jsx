@@ -21,8 +21,9 @@ const Confidentialite = () => {
                 ainsi que la <strong>date de votre consentement</strong>.
             </p>
             <p>
-                Pour votre compte client, nous traitons votre <strong>prénom</strong>, votre <strong>nom</strong>, votre
-                <strong>adresse e-mail</strong> (qui sert d'identifiant de connexion) et votre <strong>mot de passe</strong>.
+                Pour votre compte client, créé via le formulaire d'inscription, nous traitons votre <strong>nom</strong>,
+                votre <strong>prénom</strong>, votre <strong>adresse postale</strong> (rue et numéro, code postal, ville),
+                votre <strong>adresse e-mail</strong> (qui sert d'identifiant de connexion) et votre <strong>mot de passe</strong>.
                 Le mot de passe n'est jamais conservé en clair : seule une empreinte irréversible (BCrypt) est enregistrée.
                 Lors de la connexion, un identifiant de session est également utilisé (voir la <Link to="/cookies">politique cookies</Link>).
             </p>
@@ -30,8 +31,8 @@ const Confidentialite = () => {
             <h2 className="legal-page__heading">3. Finalité</h2>
             <p>Vous envoyer notre newsletter (nouveautés, offres) et conserver la preuve de votre consentement.</p>
             <p>
-                Données du compte : vous identifier lorsque vous vous connectez, vous accueillir par votre prénom et
-                protéger l'accès à votre compte.
+                Données du compte : créer votre compte, vous identifier lorsque vous vous connectez, vous accueillir
+                par votre prénom, protéger l'accès à votre compte et disposer de votre adresse pour vos commandes.
             </p>
 
             <h2 className="legal-page__heading">4. Base légale</h2>
