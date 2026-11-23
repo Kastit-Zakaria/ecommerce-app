@@ -128,6 +128,51 @@ public class AuthService {
         }
     }
 
+    // Valide toutes les valeurs avant de modifier l'entité ; le mot de passe et le rôle restent intacts.
+    @org.springframework.transaction.annotation.Transactional
+    public User fUpdateProfile(Long lngId, String strFirstName, String strLastName, String strEmail,
+                               String strAddress, String strPostalCode, String strCity) {
+        User objUser = fFindById(lngId);
+        if (objUser == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Non connecté.");
+        }
+        if (fIsBlank(strFirstName) || fIsBlank(strLastName) || fIsBlank(strEmail)
+                || fIsBlank(strAddress) || fIsBlank(strPostalCode) || fIsBlank(strCity)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, STR_REQUIRED_FIELDS);
+        }
+        String strCleanFirstName = strFirstName.trim();
+        String strCleanLastName = strLastName.trim();
+        String strCleanEmail = strEmail.trim().toLowerCase();
+        String strCleanAddress = strAddress.trim();
+        String strCleanPostalCode = strPostalCode.trim();
+        String strCleanCity = strCity.trim();
+        fCheckMaxLength(strCleanFirstName, 100, "Le prénom");
+        fCheckMaxLength(strCleanLastName, 100, "Le nom");
+        fCheckMaxLength(strCleanEmail, 255, "L'adresse e-mail");
+        fCheckMaxLength(strCleanAddress, 255, "L'adresse");
+        fCheckMaxLength(strCleanPostalCode, 10, "Le code postal");
+        fCheckMaxLength(strCleanCity, 100, "La ville");
+        if (!OBJ_EMAIL_PATTERN.matcher(strCleanEmail).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "L'adresse e-mail n'est pas valide.");
+        }
+        User objEmailOwner = objUserRepository.findByEmail(strCleanEmail).orElse(null);
+        if (objEmailOwner != null && !objEmailOwner.getId().equals(lngId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, STR_EMAIL_ALREADY_USED);
+        }
+        objUser.setFirstName(strCleanFirstName);
+        objUser.setLastName(strCleanLastName);
+        objUser.setEmail(strCleanEmail);
+        objUser.setAddress(strCleanAddress);
+        objUser.setPostalCode(strCleanPostalCode);
+        objUser.setCity(strCleanCity);
+        try {
+            return objUserRepository.saveAndFlush(objUser);
+        } catch (DataIntegrityViolationException objException) {
+            // L'index unique protège aussi contre deux changements simultanés vers le même email.
+            throw new ResponseStatusException(HttpStatus.CONFLICT, STR_EMAIL_ALREADY_USED);
+        }
+    }
+
     // fIsBlank : indique si un champ texte est absent ou ne contient que des espaces
     // Reçoit : strValue, la valeur saisie
     // Renvoie : true si le champ est vide
