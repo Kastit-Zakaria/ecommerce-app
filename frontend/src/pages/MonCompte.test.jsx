@@ -69,20 +69,14 @@ describe('Page Mon compte', () => {
         objApi.post.mockResolvedValue({ status: 204 });
     });
 
-    it('affiche le titre et le prénom, le nom et l\'e-mail du membre en lecture seule', async () => {
-        fMockApi(() => Promise.resolve({ data: objMember }));
-
+    it('affiche les six champs personnels modifiables du membre', async () => {
+        fMockApi(() => Promise.resolve({ data: { ...objMember, address: 'Rue Exemple 12', postalCode: '1000', city: 'Bruxelles' } }));
         fRenderApp('/mon-compte');
-
-        expect(await screen.findByRole('heading', { level: 1, name: 'Mon compte' })).toBeInTheDocument();
-        expect(screen.getByText('Prénom')).toBeInTheDocument();
-        expect(screen.getByText('Camille')).toBeInTheDocument();
-        expect(screen.getByText('Nom')).toBeInTheDocument();
-        expect(screen.getByText('Dupont')).toBeInTheDocument();
-        expect(screen.getByText('Adresse e-mail')).toBeInTheDocument();
-        expect(screen.getByText('c@exemple.com')).toBeInTheDocument();
-        expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-        expect(screen.queryByRole('form')).not.toBeInTheDocument();
+        expect(await screen.findByDisplayValue('Bruxelles')).toBeInTheDocument();
+        expect(screen.getByLabelText('Prénom')).toHaveValue('Camille');
+        expect(screen.getByLabelText('Nom')).toHaveValue('Dupont');
+        expect(screen.getByLabelText('Adresse e-mail')).toHaveValue('c@exemple.com');
+        expect(screen.getAllByRole('textbox')).toHaveLength(6);
     });
 
     it('redirige un visiteur vers l\'accueil et ouvre le modal de connexion', async () => {
