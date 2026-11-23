@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import objApi from '../services/api';
 import AuthContext from './authContextObject';
 
@@ -79,8 +79,31 @@ export const AuthProvider = ({ children }) => {
         fSetObjUser(null);
     };
 
+    // Une session expirée suit le parcours de connexion déjà utilisé par MemberRoute.
+    const fRefreshProfile = useCallback(async () => {
+        try {
+            const objResponse = await objApi.get('/auth/me');
+            fSetObjUser(objResponse.data);
+            return objResponse.data;
+        } catch (objError) {
+            if (objError.response?.status === 401) fSetObjUser(null);
+            throw objError;
+        }
+    }, []);
+
+    const fUpdateProfile = async (objProfile) => {
+        try {
+            const objResponse = await objApi.put('/auth/me', objProfile);
+            fSetObjUser(objResponse.data);
+            return objResponse.data;
+        } catch (objError) {
+            if (objError.response?.status === 401) fSetObjUser(null);
+            throw objError;
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ objUser, blChecking, fLogin, fRegister, fLogout }}>
+        <AuthContext.Provider value={{ objUser, blChecking, fLogin, fRegister, fLogout, fRefreshProfile, fUpdateProfile }}>
             {children}
         </AuthContext.Provider>
     );
