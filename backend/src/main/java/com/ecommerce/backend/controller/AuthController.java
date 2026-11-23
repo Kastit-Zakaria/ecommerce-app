@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,7 +47,7 @@ public class AuthController {
     }
 
     // UserResponse : ce que l'API renvoie d'un membre (jamais le mot de passe ni son empreinte)
-    public record UserResponse(String firstName, String lastName, String email) {
+    public record UserResponse(String firstName, String lastName, String email, String address, String postalCode, String city) {
     }
 
     private final AuthService objAuthService;
@@ -63,7 +65,8 @@ public class AuthController {
     // Renvoie : prénom, nom et email uniquement
     // Pourquoi : ne jamais exposer password_hash
     private UserResponse fToResponse(User objUser) {
-        return new UserResponse(objUser.getFirstName(), objUser.getLastName(), objUser.getEmail());
+        return new UserResponse(objUser.getFirstName(), objUser.getLastName(), objUser.getEmail(),
+                objUser.getAddress(), objUser.getPostalCode(), objUser.getCity());
     }
 
     // fLogin : connecte un membre (POST /api/auth/login)
@@ -131,6 +134,33 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Non connecté.");
         }
 
+        return ResponseEntity.ok(fToResponse(objUser));
+    }
+
+    // La session conserve un ID stable, y compris après changement de l'adresse e-mail.
+    public record ProfileRequest(String firstName, String lastName, String email,
+                                 String address, String postalCode, String city) {
+    }
+
+    @Value("${app.cors.allowed-origin}")
+    private String strAllowedOrigin;
+
+    // PUT exige la représentation complète des six champs éditables.
+    // Aucun identifiant, rôle ou mot de passe fourni par le client n'est utilisé.
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> fUpdateMe(@RequestBody ProfileRequest objRequest,
+                                                  HttpServletRequest objHttpRequest) {
+        HttpSession objSession = objHttpRequest.getSession(false);
+        if (objSession == null || !(objSession.getAttribute(STR_SESSION_USER_ID) instanceof Long lngUserId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Non connecté.");
+        }
+        // Protection de cette écriture par cookie contre les requêtes d'une autre origine.
+        String strOrigin = objHttpRequest.getHeader("Origin");
+        if (strOrigin != null && !strAllowedOrigin.equals(strOrigin)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Origine non autorisée.");
+        }
+        User objUser = objAuthService.fUpdateProfile(lngUserId, objRequest.firstName(), objRequest.lastName(),
+                objRequest.email(), objRequest.address(), objRequest.postalCode(), objRequest.city());
         return ResponseEntity.ok(fToResponse(objUser));
     }
 
