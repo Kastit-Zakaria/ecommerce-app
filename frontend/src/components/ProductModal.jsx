@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import objApi from '../services/api';
 import fFormatPrice from '../utils/formatPrice';
+import useModalBehavior from '../hooks/useModalBehavior';
 
 // ProductModal : fenêtre de détail d'un produit (image, marque, prix, tailles, stock)
 // Reçoit : intProductId (identifiant du produit à charger), fOnClose (fonction pour fermer le modal)
@@ -12,18 +13,9 @@ const ProductModal = ({ intProductId, fOnClose }) => {
 
     const objDialogRef = useRef(null);
 
-    // 0. Focus : entrer dans le modal à l'ouverture, revenir au bouton d'origine à la fermeture
-    useEffect(() => {
-        const objPreviousFocus = document.activeElement;
-        objDialogRef.current.focus();
-
-        // Nettoyage : exécuté à la fermeture du modal
-        return () => {
-            if (objPreviousFocus !== null && objPreviousFocus.focus) {
-                objPreviousFocus.focus();
-            }
-        };
-    }, []);
+    // 0. Comportement de fenêtre partagé avec la connexion et l'inscription : focus sur la fenêtre à l'ouverture
+    //    et retour au bouton d'origine à la fermeture, Échap, piège de Tab, blocage du défilement de la page
+    useModalBehavior(objDialogRef, objDialogRef, fOnClose);
 
     // 1. Charger le produit depuis l'API
     useEffect(() => {
@@ -36,29 +28,7 @@ const ProductModal = ({ intProductId, fOnClose }) => {
             });
     }, [intProductId]);
 
-    // 2. Fermer avec la touche Échap + bloquer le défilement de la page
-    useEffect(() => {
-        // fHandleKeyDown : ferme le modal quand on appuie sur Échap
-        // Reçoit : objEvent (l'événement clavier)
-        // Renvoie : rien
-        // Pourquoi : permettre de fermer le modal au clavier
-        const fHandleKeyDown = (objEvent) => {
-            if (objEvent.key === 'Escape') {
-                fOnClose();
-            }
-        };
-
-        document.addEventListener('keydown', fHandleKeyDown);
-        document.body.style.overflow = 'hidden';
-
-        // Nettoyage : exécuté à la fermeture du modal
-        return () => {
-            document.removeEventListener('keydown', fHandleKeyDown);
-            document.body.style.overflow = '';
-        };
-    }, [fOnClose]);
-
-    // 3. Choisir ce qu'on affiche
+    // 2. Choisir ce qu'on affiche
     let objContent;
     if (objProduct === null) {
         objContent = <p className="product-modal__loading">Chargement…</p>;
@@ -111,7 +81,7 @@ const ProductModal = ({ intProductId, fOnClose }) => {
         );
     }
 
-    // 4. Structure du modal : fond sombre + fenêtre
+    // 3. Structure du modal : fond sombre + fenêtre
     return (
         <div className="product-modal">
             <div className="product-modal__backdrop" onClick={fOnClose}></div>

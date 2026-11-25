@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-// useModalBehavior : comportement clavier et focus commun aux fenêtres de connexion et d'inscription
+// useModalBehavior : comportement clavier et focus commun aux fenêtres de connexion, d'inscription et à la fiche produit
 // Reçoit : objDialogRef (la fenêtre), objInitialFocusRef (le champ qui reçoit le focus à l'ouverture),
 //          fOnClose (fonction pour fermer la fenêtre)
 // Renvoie : rien
@@ -45,11 +45,15 @@ const useModalBehavior = (objDialogRef, objInitialFocusRef, fOnClose) => {
             const objLast = tbFocusables[tbFocusables.length - 1];
             const objActive = document.activeElement;
             const blInside = objDialogRef.current.contains(objActive);
+            // La fenêtre elle-même (tabIndex -1) peut avoir le focus : à l'ouverture de la fiche produit,
+            // ou après un clic sur son fond. Tab doit alors aller au premier contrôle et Maj+Tab au dernier,
+            // sinon le navigateur ferait sortir le focus de la fenêtre.
+            const blOnDialog = objActive === objDialogRef.current;
 
-            if (objEvent.shiftKey && (objActive === objFirst || !blInside)) {
+            if (objEvent.shiftKey && (objActive === objFirst || !blInside || blOnDialog)) {
                 objEvent.preventDefault();
                 objLast.focus();
-            } else if (!objEvent.shiftKey && (objActive === objLast || !blInside)) {
+            } else if (!objEvent.shiftKey && (objActive === objLast || !blInside || blOnDialog)) {
                 objEvent.preventDefault();
                 objFirst.focus();
             }

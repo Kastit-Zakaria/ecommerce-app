@@ -1,6 +1,6 @@
 # Guide utilisateur du site SERA
 
-Ce guide explique, pas à pas, comment utiliser le site de la boutique SERA : parcourir les collections, consulter un article, créer votre compte et vous connecter, s'inscrire à la newsletter et gérer vos choix en matière de cookies.
+Ce guide explique, pas à pas, comment utiliser le site de la boutique SERA : parcourir les collections, consulter un article, créer votre compte et vous connecter, consulter et modifier vos informations personnelles, vous déconnecter, s'inscrire à la newsletter et gérer vos choix en matière de cookies.
 
 ## Sommaire
 
@@ -10,8 +10,11 @@ Ce guide explique, pas à pas, comment utiliser le site de la boutique SERA : pa
 4. [Consulter une fiche produit](#4-consulter-une-fiche-produit)
 5. [S'inscrire à la newsletter](#5-sinscrire-à-la-newsletter)
 6. [Créer un compte et se connecter](#6-créer-un-compte-et-se-connecter)
-7. [Gérer les cookies](#7-gérer-les-cookies)
-8. [Accéder aux pages légales](#8-accéder-aux-pages-légales)
+7. [Le menu du compte](#7-le-menu-du-compte)
+8. [Consulter et modifier ses informations (Mon compte)](#8-consulter-et-modifier-ses-informations-mon-compte)
+9. [Se déconnecter](#9-se-déconnecter)
+10. [Gérer les cookies](#10-gérer-les-cookies)
+11. [Accéder aux pages légales](#11-accéder-aux-pages-légales)
 
 ---
 
@@ -99,7 +102,7 @@ La fiche présente :
 
 Pour fermer la fiche, cliquez sur la croix en haut de la fenêtre, cliquez en dehors de la fenêtre (sur le fond sombre) ou appuyez sur la touche **Échap** de votre clavier.
 
-> **À savoir :** la commande en ligne n'est pas encore ouverte. Le bouton « Ajouter au panier » est donc grisé sur les fiches. Pour toute question sur un article, contactez la boutique via les coordonnées indiquées dans les [mentions légales](#8-accéder-aux-pages-légales).
+> **À savoir :** la commande en ligne n'est pas encore ouverte. Le bouton « Ajouter au panier » est donc grisé sur les fiches. Pour toute question sur un article, contactez la boutique via les coordonnées indiquées dans les [mentions légales](#11-accéder-aux-pages-légales).
 
 ---
 
@@ -120,7 +123,7 @@ Si l'inscription n'aboutit pas, un message en rouge vous explique pourquoi :
 
 | Message affiché | Ce que cela signifie | Que faire |
 |-----------------|----------------------|-----------|
-| « Le consentement est obligatoire pour s'inscrire. » | La case de consentement n'est pas cochée. | Cochez la case, puis recommencez. |
+| « Veuillez cocher la case de consentement pour vous inscrire. » | La case de consentement n'est pas cochée. | Cochez la case, puis recommencez. |
 | « L'adresse e-mail n'est pas valide. » | L'adresse est vide ou mal écrite. | Vérifiez-la (elle doit ressembler à `nom@domaine.be`). |
 | « Cette adresse e-mail est déjà inscrite. » | Vous êtes déjà abonné(e) avec cette adresse. | Aucune action nécessaire. |
 
@@ -138,6 +141,9 @@ Vous pouvez créer votre compte client depuis n'importe quelle page du site. Un 
 
 1. Cliquez sur l'icône **« Mon compte »** (le bonhomme) en haut à droite de l'en-tête.
 2. En bas de la fenêtre **« Connexion »**, cliquez sur **« Créer un compte »**.
+
+![Lien « Créer un compte » en bas de la fenêtre de connexion](images/lien-creer-compte.png)
+
 3. Dans la fenêtre **« Créer un compte »**, remplissez les sept champs. **Tous sont obligatoires** :
    - **Nom** et **Prénom** ;
    - **Adresse** (rue et numéro), **Code postal** et **Ville** ;
@@ -145,9 +151,15 @@ Vous pouvez créer votre compte client depuis n'importe quelle page du site. Un 
    - **Mot de passe** : **8 caractères minimum**. Votre navigateur peut vous en proposer un.
 4. Cliquez sur **« Créer mon compte »**. Pendant l'envoi, le bouton affiche « Création… ».
 
+![Fenêtre « Créer un compte » avec ses sept champs](images/inscription-modal-vide.png)
+
 Si l'inscription réussit, la fenêtre se ferme et **vous êtes directement connecté(e)** : l'en-tête affiche **« Bienvenue, » suivi de votre prénom**, sur toutes les pages du site. Vous n'avez pas besoin de vous connecter une seconde fois.
 
-Si l'inscription n'aboutit pas, un message en rouge s'affiche dans la fenêtre et le curseur se place sur le champ à corriger. Les champs déjà remplis sont conservés, sauf le mot de passe, à ressaisir par sécurité.
+![En-tête d'un membre connecté : « Bienvenue, Camille »](images/entete-bienvenue.png)
+
+Si l'inscription n'aboutit pas, un message en rouge s'affiche dans la fenêtre et le curseur se place sur le champ à corriger. Les champs déjà remplis sont conservés. En cas de refus par le serveur (par exemple une adresse déjà utilisée), le mot de passe est effacé et doit être ressaisi par sécurité.
+
+![Inscription refusée : le champ « Ville » est vide](images/inscription-champ-manquant.png)
 
 | Message affiché | Ce que cela signifie | Que faire |
 |-----------------|----------------------|-----------|
@@ -157,6 +169,8 @@ Si l'inscription n'aboutit pas, un message en rouge s'affiche dans la fenêtre e
 | « Le mot de passe est trop long. » | Le mot de passe dépasse la longueur acceptée. | Choisissez un mot de passe plus court. |
 | « Un compte existe déjà avec cette adresse e-mail. » | Un compte a déjà été créé avec cette adresse : deux comptes ne peuvent pas partager la même adresse e-mail. | Connectez-vous avec cette adresse, ou utilisez-en une autre. |
 | « Inscription impossible pour le moment. Veuillez réessayer plus tard. » | Le site ne parvient pas à joindre le serveur. | Réessayez dans quelques instants. |
+
+![Inscription refusée : un compte existe déjà avec cette adresse e-mail](images/inscription-email-deja-utilise.png)
 
 Si vous avez déjà un compte, le lien **« Se connecter »**, en bas de la fenêtre, vous ramène à la connexion. Pour savoir comment vos données sont utilisées, consultez la page **Confidentialité** (lien dans la fenêtre d'inscription et dans le pied de page).
 
@@ -168,6 +182,8 @@ Si vous avez un compte, vous pouvez vous connecter depuis n'importe quelle page 
 2. Dans la fenêtre **« Connexion »**, saisissez votre **adresse e-mail** (elle sert d'identifiant) et votre **mot de passe**. Les deux champs sont obligatoires.
 3. Cliquez sur **« Se connecter »**. Pendant l'envoi, le bouton affiche « Connexion… ».
 
+![Fenêtre « Connexion »](images/connexion-modal-vide.png)
+
 Si la connexion réussit, la fenêtre se ferme, vous restez sur la page où vous étiez et l'en-tête affiche **« Bienvenue, » suivi de votre prénom**, sur toutes les pages du site. Si vous rechargez la page, vous restez connecté(e) tant que votre session n'a pas expiré.
 
 Si la connexion n'aboutit pas, un message en rouge s'affiche dans la fenêtre :
@@ -178,11 +194,101 @@ Si la connexion n'aboutit pas, un message en rouge s'affiche dans la fenêtre :
 | « Email ou mot de passe incorrect » | Les identifiants ne correspondent à aucun compte. Par sécurité, le site ne précise pas lequel des deux est faux. | Vérifiez votre saisie, puis recommencez. |
 | « Connexion impossible pour le moment. Veuillez réessayer plus tard. » | Le site ne parvient pas à joindre le serveur. | Réessayez dans quelques instants. |
 
-Vous pouvez fermer la fenêtre de connexion ou d'inscription avec la croix ✕, en cliquant à côté de la fenêtre ou avec la touche Échap. Au clavier, la touche Tab fait circuler le focus uniquement dans la fenêtre. Une fois connecté(e), l'icône « Mon compte » n'ouvre plus la fenêtre de connexion.
+Après un identifiant ou un mot de passe incorrect, le champ « Mot de passe » est vidé et le curseur s'y place, pour que vous puissiez le ressaisir.
+
+![Connexion refusée : « Email ou mot de passe incorrect »](images/connexion-erreur.png)
+
+Vous pouvez fermer la fenêtre de connexion ou d'inscription avec la croix ✕, en cliquant à côté de la fenêtre ou avec la touche Échap. Au clavier, la touche Tab fait circuler le focus uniquement dans la fenêtre. Une fois connecté(e), l'icône « Mon compte » n'ouvre plus la fenêtre de connexion : elle ouvre le [menu du compte](#7-le-menu-du-compte).
 
 ---
 
-## 7. Gérer les cookies
+## 7. Le menu du compte
+
+Une fois connecté(e), l'icône **« Mon compte »** (le bonhomme) ouvre un petit menu juste en dessous. Il propose deux choix :
+
+- **« Paramètres »** : ouvre la page **Mon compte**, où vous consultez et modifiez vos informations (voir la [section 8](#8-consulter-et-modifier-ses-informations-mon-compte)) ;
+- **« Se déconnecter »** : met fin à votre session (voir la [section 9](#9-se-déconnecter)).
+
+![Menu du compte ouvert : « Paramètres » et « Se déconnecter »](images/menu-compte.png)
+
+Pour fermer le menu sans rien choisir, cliquez de nouveau sur l'icône, cliquez ailleurs sur la page ou appuyez sur la touche **Échap**.
+
+Au clavier : à l'ouverture du menu, « Paramètres » est sélectionné ; la touche **Tab** passe à « Se déconnecter » et **Maj + Tab** revient à « Paramètres ». La touche **Entrée** valide le choix.
+
+---
+
+## 8. Consulter et modifier ses informations (Mon compte)
+
+La page **Mon compte** regroupe les informations de votre compte. Elle est réservée aux membres connectés.
+
+**Ouvrir la page**
+
+1. Cliquez sur l'icône **« Mon compte »** en haut à droite.
+2. Dans le menu, cliquez sur **« Paramètres »**.
+
+La page affiche, sous le titre **« Vos informations personnelles »**, six champs préremplis : **Prénom**, **Nom**, **Adresse e-mail**, **Adresse**, **Code postal** et **Ville**.
+
+![Page « Mon compte » avec le formulaire des informations personnelles](images/mon-compte-formulaire.png)
+
+**Modifier vos informations**
+
+1. Corrigez le ou les champs souhaités.
+2. Cliquez sur **« Enregistrer les modifications »**. Pendant l'envoi, le bouton affiche « Enregistrement… » et les champs ne sont plus modifiables.
+
+Si l'enregistrement réussit, le message **« Vos informations ont été mises à jour. »** s'affiche en haut du formulaire. Il disparaît dès que vous modifiez de nouveau un champ.
+
+![Message de confirmation après une modification réussie](images/mon-compte-confirmation.png)
+
+Bon à savoir :
+
+- Si vous changez votre **prénom**, la mention « Bienvenue, » de l'en-tête est mise à jour aussitôt.
+- Si vous changez votre **adresse e-mail**, c'est la nouvelle adresse qui vous servira pour vous connecter la prochaine fois. Vous restez connecté(e) pendant le changement.
+- Vos modifications sont enregistrées : elles restent affichées si vous rechargez la page ou si vous revenez plus tard.
+- Le **mot de passe** ne se modifie pas sur cette page.
+
+**Règles à respecter**
+
+- **Les six champs sont obligatoires.** Un champ ne peut pas rester vide ni contenir uniquement des espaces.
+- L'adresse e-mail doit avoir la forme `nom@domaine.be`, et ne doit pas être celle d'un autre compte.
+- Les longueurs sont limitées : 10 caractères pour le code postal, 100 pour le prénom, le nom et la ville, 255 pour l'adresse et l'adresse e-mail. Le formulaire empêche de saisir davantage.
+- Les espaces au début et à la fin des champs sont retirés, et l'adresse e-mail est enregistrée en minuscules.
+
+**Si l'enregistrement n'aboutit pas**
+
+Si un champ est vide, ou si l'adresse e-mail ne contient pas d'arobase (@), votre navigateur signale le champ à corriger (par exemple « Veuillez renseigner ce champ. ») et rien n'est envoyé. Dans les autres cas, un message en rouge s'affiche en haut du formulaire. Vos saisies sont conservées pour que vous puissiez les corriger.
+
+| Message affiché | Ce que cela signifie | Que faire |
+|-----------------|----------------------|-----------|
+| « Tous les champs sont obligatoires. » | Un champ ne contient que des espaces. | Remplissez le champ concerné. |
+| « L'adresse e-mail n'est pas valide. » | L'adresse n'a pas la forme `nom@domaine.be` (par exemple, l'extension « .be » manque). | Corrigez l'adresse e-mail. |
+| « Un compte existe déjà avec cette adresse e-mail. » | Cette adresse appartient déjà à un autre compte. | Utilisez une autre adresse. |
+| « Impossible d'enregistrer les modifications. Veuillez réessayer. » | Le site ne parvient pas à joindre le serveur. | Réessayez dans quelques instants. |
+| « Impossible de charger vos informations. Veuillez réessayer. » | Vos informations n'ont pas pu être affichées à l'ouverture de la page. | Cliquez sur le bouton **« Réessayer »** qui s'affiche sous le message. |
+
+![Modification refusée : « L'adresse e-mail n'est pas valide. »](images/mon-compte-erreur.png)
+
+> **À savoir :** si vous ouvrez l'adresse de la page Mon compte sans être connecté(e), vous êtes ramené(e) à l'accueil et la fenêtre de connexion s'ouvre. Si votre session a expiré pendant que vous étiez sur la page, vous êtes ramené(e) à l'accueil : reconnectez-vous, puis recommencez la modification.
+
+---
+
+## 9. Se déconnecter
+
+1. Cliquez sur l'icône **« Mon compte »** en haut à droite.
+2. Dans le menu, cliquez sur **« Se déconnecter »**.
+
+La mention « Bienvenue, » disparaît de l'en-tête : vous êtes de nouveau simple visiteur. Vous restez sur la page où vous étiez, sauf si vous étiez sur la page **Mon compte** : vous êtes alors ramené(e) à l'accueil, car cette page est réservée aux membres. Si vous rechargez la page, vous restez déconnecté(e).
+
+![En-tête après la déconnexion : la mention « Bienvenue » a disparu](images/entete-deconnexion.png)
+
+Après la déconnexion, l'icône « Mon compte » ouvre de nouveau la fenêtre de connexion.
+
+Si le message **« Déconnexion impossible pour le moment. Veuillez réessayer plus tard. »** s'affiche dans le menu, le site n'a pas pu joindre le serveur : vous êtes toujours connecté(e). Réessayez dans quelques instants.
+
+> **Conseil :** sur un ordinateur partagé, pensez à vous déconnecter à la fin de votre visite.
+
+---
+
+## 10. Gérer les cookies
 
 Lors de votre première visite, un bandeau s'affiche en bas de l'écran : **« Vos choix en matière de cookies »**. Le site n'utilise que les cookies nécessaires à son fonctionnement ; d'autres ne peuvent être utilisés qu'avec votre accord.
 
@@ -206,7 +312,7 @@ Votre choix est mémorisé sur votre appareil : le bandeau ne s'affiche plus lor
 
 ---
 
-## 8. Accéder aux pages légales
+## 11. Accéder aux pages légales
 
 Les pages légales sont accessibles depuis la ligne du bas du pied de page, sur toutes les pages du site.
 

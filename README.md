@@ -25,7 +25,11 @@ npm run dev
 
 ## Documentation
 
-- [Guide utilisateur](docs/guide-utilisateur.md) : utiliser le site (catégories, filtres, fiches produit, newsletter, cookies, pages légales).
-- [Documentation technique](docs/documentation-technique.md) : architecture, base de données, API, tests, standard de codage, workflow Git.
-- [Mise en ligne](docs/deploiement.md) : variables d'environnement, construction et déploiement.
-- [Cahier de tests fonctionnels](docs/tests-fonctionnels.md) : tests manuels à dérouler avant une livraison.
+Les documents livrés sont au format PDF, dans `docs/pdf/` :
+
+- [Guide utilisateur](docs/pdf/guide-utilisateur.pdf) : utiliser le site (catégories, filtres, fiches produit, compte client, newsletter, cookies, pages légales).
+- [Documentation technique](docs/pdf/documentation-technique.pdf) : architecture, base de données, API, tests, standard de codage, workflow Git.
+- [Mise en ligne](docs/pdf/deploiement.pdf) : variables d'environnement, construction et déploiement.
+- [Cahier de tests fonctionnels](docs/pdf/tests-fonctionnels.pdf) : tests manuels à dérouler avant une livraison, avec les résultats de la dernière exécution.
+
+Les fichiers Markdown du dossier `docs/` (`guide-utilisateur.md`, `documentation-technique.md`, `deploiement.md`, `tests-fonctionnels.md`) sont les sources modifiables de ces PDF : toute mise à jour se fait dans ces fichiers, puis les PDF sont régénérés.
