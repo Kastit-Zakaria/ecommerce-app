@@ -17,7 +17,7 @@ const objProduct = {
     stock: 4,
     imageUrl: '/polo.jpg',
     brand: { id: 1, name: 'Marque Test' },
-    sizes: [{ id: 1, label: 'M' }],
+    sizes: [{ id: 1, label: 'M' }, { id: 2, label: 'L' }],
 };
 
 describe('ProductModal', () => {
@@ -69,6 +69,54 @@ describe('ProductModal', () => {
         await userEvent.keyboard('{Escape}');
 
         expect(fOnClose).toHaveBeenCalled();
+    });
+
+    it('garde le focus dans la fiche avec Tab : après la dernière taille, retour sur Fermer', async () => {
+        objApi.get.mockResolvedValue({ data: objProduct });
+        const objOutside = document.createElement('button');
+        document.body.appendChild(objOutside);
+
+        render(<ProductModal intProductId={10} fOnClose={vi.fn()} />);
+        await screen.findByRole('heading', { name: 'Polo bleu' });
+
+        // Depuis la fenêtre (focus initial), Tab va sur le premier contrôle
+        await userEvent.tab();
+        expect(screen.getByRole('button', { name: 'Fermer' })).toHaveFocus();
+        await userEvent.tab();
+        expect(screen.getByRole('button', { name: 'M' })).toHaveFocus();
+        await userEvent.tab();
+        expect(screen.getByRole('button', { name: 'L' })).toHaveFocus();
+        // « Ajouter au panier » est désactivé : la boucle revient sur Fermer
+        await userEvent.tab();
+        expect(screen.getByRole('button', { name: 'Fermer' })).toHaveFocus();
+        expect(objOutside).not.toHaveFocus();
+        objOutside.remove();
+    });
+
+    it('garde le focus dans la fiche avec Maj+Tab, y compris depuis la fenêtre à l\'ouverture', async () => {
+        objApi.get.mockResolvedValue({ data: objProduct });
+
+        render(<ProductModal intProductId={10} fOnClose={vi.fn()} />);
+        await screen.findByRole('heading', { name: 'Polo bleu' });
+        expect(screen.getByRole('dialog')).toHaveFocus();
+
+        await userEvent.tab({ shift: true });
+        expect(screen.getByRole('button', { name: 'L' })).toHaveFocus();
+
+        screen.getByRole('button', { name: 'Fermer' }).focus();
+        await userEvent.tab({ shift: true });
+        expect(screen.getByRole('button', { name: 'L' })).toHaveFocus();
+    });
+
+    it('bloque le défilement de la page pendant l\'ouverture et le rétablit à la fermeture', async () => {
+        objApi.get.mockResolvedValue({ data: objProduct });
+
+        const { unmount } = render(<ProductModal intProductId={10} fOnClose={vi.fn()} />);
+        expect(document.body.style.overflow).toBe('hidden');
+
+        unmount();
+
+        expect(document.body.style.overflow).toBe('');
     });
 
     it('appelle fOnClose au clic sur le bouton Fermer', async () => {

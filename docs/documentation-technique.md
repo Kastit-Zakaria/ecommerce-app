@@ -16,6 +16,7 @@ Ce document s'adresse au développeur qui reprend le projet. Il décrit ce qui e
 10. [Installation en local et déploiement](#10-installation-en-local-et-déploiement)
 11. [Workflow Git](#11-workflow-git)
 12. [Sécurité des mots de passe](#12-sécurité-des-mots-de-passe)
+13. [Flux du compte membre : inscription, modification du profil, déconnexion](#13-flux-du-compte-membre--inscription-modification-du-profil-déconnexion)
 
 ---
 
@@ -33,7 +34,7 @@ Le site est une application à trois niveaux : une interface React qui appelle u
 ```
 
 - Le frontend est une application à page unique. Il appelle l'API avec Axios ; l'adresse de l'API vient de la variable `VITE_API_URL`.
-- Le backend expose des routes sous `/api`. Il n'a pas d'authentification à ce jour.
+- Le backend expose des routes sous `/api`. Les membres sont authentifiés par session HTTP (cookie `JSESSIONID`, routes `/api/auth`) ; seule la modification du profil (`PUT /api/auth/me`) exige d'être connecté.
 - Le navigateur n'appelle l'API qu'à partir de l'origine autorisée par CORS (variable `CORS_ALLOWED_ORIGIN`).
 - Le schéma de la base est créé à l'avance par un script SQL. Hibernate ne fait que le **vérifier** (`spring.jpa.hibernate.ddl-auto=validate`) : il ne crée ni ne modifie aucune table.
 
@@ -90,7 +91,6 @@ ecommerce-app/
 ├── frontend/           Application React
 ├── database/           Scripts SQL
 ├── docs/               Documentation
-├── CLAUDE.md           Règles de développement du projet
 └── README.md           Présentation et installation
 ```
 
@@ -127,8 +127,8 @@ Chaque couche a un rôle précis, et les appels vont toujours dans le même sens
 |--------|------|
 | `entity` | Classes mappées sur les tables (JPA). Elles servent aussi de format JSON des réponses. Les noms d'attributs des entités sont ceux de la base et ne suivent pas le préfixe du standard de codage. |
 | `repository` | Interfaces Spring Data JPA : requêtes sur la base. Les requêtes sont déduites du nom de la méthode (`findByCategoryId`, `findTop8ByOrderByIdDesc`, `existsByEmail`). |
-| `service` | Logique métier et règles : 404 si un produit est inconnu, validation de la newsletter (consentement, format d'e-mail, doublon), connexion et inscription des membres (`AuthService`). |
-| `controller` | Routes HTTP : reçoit la requête, appelle le service et renvoie la réponse JSON. Le `NewsletterController` convertit les erreurs du service en `{ "message": "..." }`. |
+| `service` | Logique métier et règles : 404 si un produit est inconnu, validation de la newsletter (consentement, format d'e-mail, doublon), connexion, inscription et modification du profil des membres (`AuthService`). |
+| `controller` | Routes HTTP : reçoit la requête, appelle le service et renvoie la réponse JSON. `NewsletterController` et `AuthController` convertissent les erreurs du service en `{ "message": "..." }`. `AuthController` gère aussi la session HTTP (ouverture, lecture, destruction) et contrôle l'en-tête `Origin` de la modification du profil. |
 | `config` | Configuration : `CorsConfig` autorise l'origine du front (avec les cookies) ; `PasswordConfig` déclare l'encodeur BCrypt. |
 
 Fichiers de configuration : `backend/src/main/resources/application.properties` (connexion MySQL, CORS, JPA) ; `backend/src/test/resources/application.properties` (H2 en mémoire pour les tests).
@@ -152,9 +152,9 @@ test/setup.js              Configuration commune des tests
 | Dossier | Rôle |
 |---------|------|
 | `components/` | Éléments d'interface : `Header`, `CategoryList`, `Footer`, `CookieBanner`, `ProductList`, `ProductModal`, `LoginModal`, `RegisterModal`, `MemberRoute`, `HeroVideo`, `Reassurance`, `Universes`, `EditorialBanner`, `LegalPage`, `ScrollToTop`. |
-| `pages/` | Assemblage des composants pour une route : `Home`, `About`, `MentionsLegales`, `Cgv`, `Confidentialite`, `Cookies`. Les pages légales s'appuient sur le composant `LegalPage`. |
-| `context/` | `AuthContext.jsx` : `AuthProvider` (membre connecté, `fLogin`, `fRegister`, `fLogout`) ; `useAuth.js` : hook d'accès ; `authContextObject.js` : objet de contexte partagé. Au démarrage, il appelle `GET /api/auth/me` pour retrouver la session. |
-| `hooks/` | `useModalBehavior.js` : comportement commun aux fenêtres de connexion et d'inscription (focus initial et retour du focus, Échap, piège de Tab, blocage du défilement de la page). |
+| `pages/` | Assemblage des composants pour une route : `Home`, `About`, `MentionsLegales`, `Cgv`, `Confidentialite`, `Cookies`, `MonCompte`. Les pages légales s'appuient sur le composant `LegalPage`. |
+| `context/` | `AuthContext.jsx` : `AuthProvider` (membre connecté `objUser`, `blChecking`, `fLogin`, `fRegister`, `fLogout`, `fRefreshProfile`, `fUpdateProfile`) ; `useAuth.js` : hook d'accès ; `authContextObject.js` : objet de contexte partagé. Au démarrage, il appelle `GET /api/auth/me` pour retrouver la session. |
+| `hooks/` | `useModalBehavior.js` : comportement commun aux fenêtres de connexion, d'inscription et à la fiche produit (focus initial et retour du focus, Échap, piège de Tab, blocage du défilement de la page). |
 | `services/` | `api.js` crée le client Axios partagé (adresse via `VITE_API_URL`, `http://localhost:8080/api` par défaut, `withCredentials: true` pour le cookie de session) ; `newsletter.js` envoie l'inscription. |
 | `utils/` | `formatPrice.js` (prix en euros, locale `fr-BE`) ; `cookieConsent.js` (lecture et écriture du choix de cookies dans `localStorage`, clé `sera-cookie-consent`). |
 | `config/` | `company.js` : informations légales de la société, source unique pour le pied de page et les pages légales. |
@@ -162,7 +162,7 @@ test/setup.js              Configuration commune des tests
 
 Autres éléments : `frontend/public/` (images, vidéos, favicon), `frontend/.env.example` (modèle de configuration).
 
-**Emplacements prévus pour les prochains sprints.** L'en-tête contient quatre icônes (Rechercher, Mon compte, Favoris, Panier) ; seule « Mon compte » est active (ouverture du modal de connexion tant que personne n'est connecté). Les autres et la fiche produit un bouton « Ajouter au panier » désactivé. ainsi que le bouton « Ajouter au panier » sont des emplacements d'interface sans comportement associé : aucune route, aucun appel API ni aucune logique ne les alimente.
+**Emplacements prévus pour les prochains sprints.** L'en-tête contient quatre icônes : Rechercher, Mon compte, Favoris et Panier. Seule « Mon compte » est active : pour un visiteur, elle ouvre le modal de connexion ; pour un membre connecté, elle ouvre le panneau du compte (« Paramètres », « Se déconnecter »). Les icônes Rechercher, Favoris et Panier, ainsi que le bouton « Ajouter au panier » de la fiche produit (désactivé), sont des emplacements d'interface sans comportement associé : aucune route, aucun appel API ni aucune logique ne les alimente.
 
 ---
 
@@ -181,7 +181,7 @@ Schéma : `database/ecommercedb.sql` (base `ecommercedb`, MySQL/MariaDB, `utf8mb
 | `sizes` | `id`, `label`, `sort_order` | Tailles, triées par `sort_order` |
 | `product_sizes` | `product_id`, `size_id` | Table de liaison produit ↔ tailles |
 | `newsletter_subscribers` | `id`, `email`, `consent_date` | Inscrits à la newsletter, avec la date du consentement |
-| `users` | `id`, `first_name`, `last_name`, `address`, `postal_code`, `city`, `email` (unique), `password_hash` (BCrypt), `role` (défaut `ROLE_USER`) | Membres : créés par l'inscription, utilisés par la connexion |
+| `users` | `id`, `first_name`, `last_name`, `address`, `postal_code`, `city`, `email` (unique), `password_hash` (BCrypt), `role` (défaut `ROLE_USER`) | Membres : créés par l'inscription, utilisés par la connexion ; prénom, nom, e-mail, adresse, code postal et ville modifiables depuis la page Mon compte (`password_hash` et `role` ne le sont jamais) |
 
 ### Tables prévues pour les évolutions futures
 
@@ -226,7 +226,13 @@ Sept entités existent : `Category`, `Brand`, `ProductType`, `Size`, `Product`, 
 
 ## 5. API REST
 
-Toutes les routes sont préfixées par `/api`. Les réponses sont en JSON. Aucune route ne l'exige encore, mais l'API sait authentifier un membre par session HTTP (`/api/auth`).
+Toutes les routes sont préfixées par `/api`. Les réponses sont en JSON. Le membre est authentifié par session HTTP (`/api/auth`) ; seule `PUT /api/auth/me` exige une session.
+
+Les routes `/api/auth/login`, `/api/auth/register`, `GET` et `PUT /api/auth/me` renvoient toutes le même objet membre (`UserResponse`), sans mot de passe ni empreinte :
+
+```json
+{ "firstName": "...", "lastName": "...", "email": "...", "address": "...", "postalCode": "...", "city": "..." }
+```
 
 | Méthode | URL | Paramètres | Réponse | Codes |
 |---------|-----|------------|---------|-------|
@@ -235,9 +241,11 @@ Toutes les routes sont préfixées par `/api`. Les réponses sont en JSON. Aucun
 | `GET` | `/api/products/latest` | aucun | Les 8 produits les plus récents (identifiant décroissant) | 200 |
 | `GET` | `/api/products/{id}` | `id` (chemin) : identifiant du produit | Le produit, avec sa catégorie, sa marque, son type et ses tailles | 200, 404 |
 | `POST` | `/api/newsletter` | Corps JSON : `{ "email": "...", "consent": true }` | `{ "message": "Merci, votre inscription est enregistrée." }` | 201, 400, 409 |
-| `POST` | `/api/auth/login` | Corps JSON : `{ "email": "...", "password": "..." }` | `{ "firstName": "...", "lastName": "...", "email": "..." }` et ouverture de la session (cookie `JSESSIONID`) | 200, 400, 401 |
-| `POST` | `/api/auth/register` | Corps JSON : `{ "lastName", "firstName", "address", "postalCode", "city", "email", "password" }` | `{ "firstName": "...", "lastName": "...", "email": "..." }` ; le compte est créé et la session ouverte (le membre est connecté) | 201, 400, 409 |
-| `GET` | `/api/auth/me` | aucun (cookie de session) | Le membre connecté : `{ "firstName", "lastName", "email" }` | 200, 401 |
+| `POST` | `/api/auth/login` | Corps JSON : `{ "email": "...", "password": "..." }` | L'objet membre et ouverture de la session (cookie `JSESSIONID`) | 200, 400, 401 |
+| `POST` | `/api/auth/register` | Corps JSON : `{ "lastName", "firstName", "address", "postalCode", "city", "email", "password" }` | L'objet membre ; le compte est créé et la session ouverte (le membre est connecté) | 201, 400, 409 |
+| `GET` | `/api/auth/me` | aucun (cookie de session) | L'objet membre connecté, relu en base à chaque appel | 200, 401 |
+| `PUT` | `/api/auth/me` | Cookie de session ; corps JSON complet : `{ "firstName", "lastName", "email", "address", "postalCode", "city" }` (les six champs sont obligatoires) ; en-tête `Origin` vérifié s'il est présent | L'objet membre après enregistrement | 200, 400, 401, 403, 409 |
+| `POST` | `/api/auth/logout` | aucun (cookie de session) | Aucun corps ; la session est détruite côté serveur | 204 |
 
 ### Format d'un produit
 
@@ -276,14 +284,33 @@ Les clés JSON suivent les noms des attributs de l'entité `Product` :
 | 400 | `POST /api/auth/register` | E-mail invalide | `{ "message": "L'adresse e-mail n'est pas valide." }` |
 | 400 | `POST /api/auth/register` | Mot de passe de moins de 8 caractères, ou de plus de 72 octets | `{ "message": "Le mot de passe doit contenir au moins 8 caractères." }` ou `{ "message": "Le mot de passe est trop long." }` |
 | 409 | `POST /api/auth/register` | E-mail déjà utilisé par un membre | `{ "message": "Un compte existe déjà avec cette adresse e-mail." }` |
+| 401 | `PUT /api/auth/me` | Pas de session, session sans membre, ou membre supprimé entre-temps | `{ "message": "Non connecté." }` |
+| 403 | `PUT /api/auth/me` | En-tête `Origin` différent de l'origine autorisée | Corps texte `Invalid CORS request` (refus de la configuration CORS, voir plus bas) ; si la requête atteint le contrôleur : `{ "message": "Origine non autorisée." }` |
+| 400 | `PUT /api/auth/me` | Un des six champs vide, absent ou composé d'espaces | `{ "message": "Tous les champs sont obligatoires." }` |
+| 400 | `PUT /api/auth/me` | Champ plus long que sa colonne | Par exemple `{ "message": "Le prénom ne doit pas dépasser 100 caractères." }` |
+| 400 | `PUT /api/auth/me` | E-mail invalide | `{ "message": "L'adresse e-mail n'est pas valide." }` |
+| 409 | `PUT /api/auth/me` | E-mail déjà utilisé par **un autre** membre | `{ "message": "Un compte existe déjà avec cette adresse e-mail." }` |
+
+`POST /api/auth/logout` ne renvoie jamais d'erreur : il répond 204 avec ou sans session, ce qui rend l'appel inoffensif si le membre est déjà déconnecté (session expirée, autre onglet).
 
 Règles de l'inscription : les contrôles sont faits dans l'ordre du tableau ci-dessus ; les champs texte sont nettoyés (espaces retirés au début et à la fin) et l'e-mail est mis en minuscules avant la recherche de doublon et l'enregistrement ; le mot de passe n'est pas modifié. Si deux inscriptions simultanées utilisent le même e-mail, l'index unique de la colonne `email` refuse la seconde, qui reçoit aussi le 409.
+
+Règles de la modification du profil (`AuthController.fUpdateMe` puis `AuthService.fUpdateProfile`), dans l'ordre :
+
+1. **Session** : le membre est identifié uniquement par l'identifiant rangé dans la session. Le corps de la requête ne contient ni identifiant, ni rôle, ni mot de passe : un membre ne peut donc modifier que son propre compte, et jamais son mot de passe ni son rôle. Sans session valide : 401.
+2. **En-tête `Origin`** : s'il est présent et différent de `app.cors.allowed-origin`, la requête est refusée (403). Cette écriture repose sur le cookie de session : le contrôle empêche un autre site d'envoyer la modification à la place du membre (falsification de requête). Une requête sans en-tête `Origin` (client hors navigateur) n'est pas concernée. En pratique, la configuration CORS refuse déjà toute requête dont l'`Origin` n'est pas autorisée, avant le contrôleur (réponse 403 au corps texte `Invalid CORS request`) ; la vérification du contrôleur reste une seconde barrière si la configuration CORS change. Une requête sans session reçoit le 401 avant ce contrôle, si elle atteint le contrôleur.
+3. **Membre** : s'il n'existe plus en base, 401.
+4. **Champs** : les six champs sont obligatoires (400) ; ils sont nettoyés (espaces retirés au début et à la fin), l'e-mail est mis en minuscules ; longueurs maximales identiques à l'inscription (400) ; format de l'e-mail (400).
+5. **Doublon** : si l'e-mail appartient à un autre membre, 409. Conserver son propre e-mail est accepté.
+6. **Enregistrement** : les six valeurs sont écrites dans une transaction, `password_hash` et `role` restent intacts. Si deux membres prennent le même e-mail en même temps, l'index unique refuse le second, qui reçoit aussi le 409.
+
+La session conserve le même identifiant de membre après un changement d'e-mail : le membre reste connecté et se connectera ensuite avec la nouvelle adresse.
 
 Règles de la newsletter : le consentement est vérifié avant le format de l'e-mail ; l'adresse est nettoyée (espaces retirés, minuscules) avant la recherche de doublon et l'enregistrement ; la date du consentement est enregistrée.
 
 ### CORS
 
-Seule l'origine définie par `app.cors.allowed-origin` (variable `CORS_ALLOWED_ORIGIN`, défaut `http://localhost:5173`) peut appeler l'API, avec les méthodes `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`. `allowCredentials(true)` est activé pour que le navigateur envoie et reçoive le cookie de session ; l'origine est donc toujours explicite (jamais `*`). Côté front, Axios est configuré avec `withCredentials: true`.
+Seule l'origine définie par `app.cors.allowed-origin` (variable `CORS_ALLOWED_ORIGIN`, défaut `http://localhost:5173`) peut appeler l'API, avec les méthodes `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`. `allowCredentials(true)` est activé pour que le navigateur envoie et reçoive le cookie de session ; l'origine est donc toujours explicite (jamais `*`). Côté front, Axios est configuré avec `withCredentials: true`. Une requête portant un en-tête `Origin` non autorisé est refusée par Spring avec un 403 (corps texte `Invalid CORS request`), quelle que soit la route.
 
 ---
 
@@ -299,10 +326,40 @@ Déclarées dans `frontend/src/App.jsx` (React Router, `BrowserRouter`).
 | `/cgv` | `Cgv` | Conditions générales de vente |
 | `/confidentialite` | `Confidentialite` | Politique de confidentialité |
 | `/cookies` | `Cookies` | Politique de cookies |
+| `/mon-compte` | `MonCompte`, protégée par `MemberRoute` | Formulaire des informations personnelles du membre connecté |
 
 `Header`, `Footer`, `CookieBanner` et `ScrollToTop` sont affichés quelle que soit la route. `ScrollToTop` remonte en haut à chaque changement de page, sauf si l'adresse contient une ancre (`#produits`), et désactive la restauration automatique du défilement par le navigateur (le bouton Précédent ouvre donc la page en haut). Le défilement vers `#produits` est assuré par `Home`, une fois la section « Nos univers » chargée, car elle modifie la position de la liste des produits en s'affichant.
 
 La connexion et l'inscription n'ont pas de route : ce sont deux modals (`LoginModal`, `RegisterModal`) ouverts depuis l'icône « Mon compte » du `Header`, depuis n'importe quelle page. Le lien « Créer un compte » de la connexion ouvre l'inscription, et le lien « Se connecter » de l'inscription revient à la connexion ; le `Header` n'affiche jamais les deux à la fois. `AuthProvider` enveloppe toute l'application, ce qui permet au `Header` d'afficher « Bienvenue, [prénom] » sur toutes les routes.
+
+Pour un membre connecté, l'icône « Mon compte » n'ouvre plus de modal : elle ouvre un panneau (`#account-panel`) avec le lien « Paramètres » (vers `/mon-compte`) et le bouton « Se déconnecter ». C'est un panneau de type *disclosure* : le bouton porte `aria-expanded` et `aria-controls`, le panneau est une simple liste parcourue avec Tab (pas de rôle `menu`). Il se ferme avec Échap (focus rendu à l'icône), par un clic extérieur (focus laissé en place), par un second clic sur l'icône ou par le choix d'une option. Pour un visiteur, le bouton porte `aria-haspopup="dialog"`.
+
+### `MemberRoute` : pages réservées aux membres
+
+`MemberRoute` (`components/MemberRoute.jsx`) enveloppe une page réservée aux membres (aujourd'hui `/mon-compte`). Il lit `objUser` et `blChecking` dans le contexte :
+
+| Situation | Rendu |
+|-----------|-------|
+| Session en cours de vérification (`blChecking`, par exemple juste après un F5) | Rien : on ne redirige pas à tort un membre dont la session n'est pas encore relue |
+| Membre connecté | La page |
+| Membre qui vient de se déconnecter **sur** la page (le membre du rendu précédent existait) | Redirection vers `/`, sans ouvrir le modal |
+| Visiteur arrivé directement sur l'adresse | Redirection vers `/` avec l'état `{ blOpenLogin: true }` |
+
+Le `Header` lit cet état de navigation et ouvre le modal de connexion. À la fermeture du modal, il remplace l'entrée d'historique par la même adresse sans état, pour qu'un rechargement ne rouvre pas le modal.
+
+### Fenêtres et compte membre
+
+| Élément | Fichier | Rôle |
+|---------|---------|------|
+| `LoginModal` | `components/LoginModal.jsx` | Modal « Connexion » : e-mail et mot de passe obligatoires (contrôle avant envoi), appel `fLogin`, message d'erreur dans une zone `role="alert"`, champ mot de passe vidé et focus dessus après un échec, lien « Créer un compte ». |
+| `RegisterModal` | `components/RegisterModal.jsx` | Modal « Créer un compte » : sept champs obligatoires décrits dans le tableau `TB_FIELDS` (libellé, type, `autocomplete`, longueur maximale). `fFindClientError` refait les contrôles de l'API (champ vide, format de l'e-mail, mot de passe de 8 caractères minimum et de 72 octets maximum) et place le focus sur le premier champ fautif. Les valeurs sont nettoyées (`trim`, sauf le mot de passe) puis envoyées par `fRegister`. En cas de refus du serveur, le mot de passe est vidé et le focus va sur l'e-mail (409) ou sur le mot de passe (autres cas). Lien « Se connecter » pour revenir à la connexion. |
+| `useModalBehavior` | `hooks/useModalBehavior.js` | Hook partagé par `LoginModal`, `RegisterModal` et `ProductModal`. Reçoit la référence de la fenêtre, celle de l'élément qui reçoit le focus initial et la fonction de fermeture. Il place le focus initial, le rend à l'élément d'origine à la fermeture, ferme avec Échap, piège Tab et Maj+Tab dans la fenêtre (liens, boutons et champs actifs, les boutons désactivés étant ignorés) et bloque le défilement de la page (`body.style.overflow = 'hidden'`) tant que la fenêtre est ouverte. Si la fenêtre elle-même a le focus (`tabIndex=-1` : focus initial de la fiche produit, ou clic sur le fond de la fenêtre), Tab va au premier contrôle et Maj+Tab au dernier. |
+| `ProductModal` | `components/ProductModal.jsx` | Fiche produit ouverte depuis `Home`. Charge le produit avec `GET /products/{id}` et appelle `useModalBehavior(objDialogRef, objDialogRef, fOnClose)` : la fenêtre elle-même reçoit le focus à l'ouverture, Tab et Maj+Tab bouclent sur la croix et les tailles (« Ajouter au panier » est désactivé), et le focus revient sur le bouton « Voir le produit » d'origine à la fermeture. |
+| `MonCompte` | `pages/MonCompte.jsx` | Page `/mon-compte`. À l'ouverture, relit le profil avec `fRefreshProfile` (`GET /api/auth/me`) plutôt que de reprendre le contexte, puis affiche un formulaire de six champs décrits dans le tableau `arrFields` (`required`, `maxLength` de la colonne, `autocomplete`, type `email` pour l'adresse e-mail). L'envoi passe par `fUpdateProfile` (`PUT /api/auth/me`) ; une référence (`objSavingRef`) empêche une double soumission et le `fieldset` est désactivé pendant l'enregistrement. Succès : « Vos informations ont été mises à jour. » (`role="status"`) et formulaire remis aux valeurs renvoyées par l'API. Échec : le message de l'API, ou « Impossible d'enregistrer les modifications. Veuillez réessayer. », dans une zone `role="alert"` ; les saisies sont conservées. Échec de la lecture initiale : « Impossible de charger vos informations. Veuillez réessayer. » et un bouton « Réessayer ». |
+
+Le formulaire de `MonCompte` n'a pas l'attribut `noValidate` : un champ vide ou une adresse sans `@` est bloqué par la validation du navigateur, sans appel à l'API. Les autres erreurs (adresse sans extension, champ ne contenant que des espaces, doublon) viennent de l'API.
+
+Dans `AuthContext`, `fUpdateProfile` et `fRefreshProfile` mettent à jour `objUser` avec la réponse : le « Bienvenue, [prénom] » du `Header` change aussitôt après une modification du prénom. Sur une réponse 401 (session expirée), ils remettent `objUser` à `null` : `MemberRoute` renvoie alors le membre vers l'accueil.
 
 Il n'y a pas de route dédiée pour une catégorie ou un produit : la catégorie choisie est un état de `App`, et la fiche produit est un modal de `Home`. Une adresse inconnue n'affiche que l'en-tête et le pied de page (aucune route « 404 » n'est déclarée).
 
@@ -348,13 +405,13 @@ Points à retenir :
 - Sans catégorie choisie, `ProductList` appelle `GET /products/latest`.
 - À chaque changement de catégorie, le filtre par type est remis sur « Tout ».
 - Le filtre par type est **fait dans le navigateur** : `ProductList` filtre les produits déjà reçus selon `type.id`. L'API ne propose pas de paramètre de filtre.
-- Un clic sur « Voir le produit » ouvre `ProductModal`, qui appelle `GET /products/{id}`.
+- Un clic sur « Voir le produit » ouvre `ProductModal`, qui appelle `GET /products/{id}`. La fiche se comporte comme les autres fenêtres du site (hook `useModalBehavior`, voir la [section 6](#fenêtres-et-compte-membre)).
 
 ---
 
 ## 8. Standard de codage
 
-Résumé des règles de `CLAUDE.md`, qui constitue la définition du fini.
+Résumé du standard de codage du projet, qui constitue la définition du fini.
 
 - **Variables** : `typeCamelCase` avec un préfixe de type : `int`, `fl`, `dt`, `str`, `tb`, `bl` (exemples : `strTitle`, `tbProducts`, `blLoading`). Le code utilise aussi le préfixe `obj` pour les objets (exemples : `objCategory`, `objApi`).
 - **Fonctions** : `fCamelCase` (exemples : `fFormatPrice`, `fHandleSelectCategory`).
@@ -374,18 +431,18 @@ Résumé des règles de `CLAUDE.md`, qui constitue la définition du fini.
 | Outils | JUnit (Spring Boot Test), H2 en mémoire | Vitest, Testing Library, jsdom |
 | Emplacement | `backend/src/test/java/com/ecommerce/backend/` | Fichiers `*.test.jsx` / `*.test.js` à côté du code, dans `frontend/src/` |
 | Commande | `cd backend` puis `./mvnw test` (`mvnw.cmd test` sous Windows) | `cd frontend` puis `npm test` |
-| Nombre de tests | **47** | **76** |
+| Nombre de tests | **53** | **84** |
 
-**Backend (47 tests)** : `BackendApplicationTests` (1, démarrage du contexte), `ApiIntegrationTest` (6), `NewsletterIntegrationTest` (4) et `AuthIntegrationTest` (13, MockMvc : connexion, `me`, déconnexion, renouvellement de la session ; inscription réussie avec session ouverte, connexion avec le compte créé, e-mail déjà utilisé, champs vides ou invalides) pour les routes, `CategoryServiceTest` (2), `ProductServiceTest` (5), `NewsletterServiceTest` (4) et `AuthServiceTest` (12 : connexion ; inscription avec empreinte BCrypt, champ vide, e-mail invalide, mot de passe trop court ou trop long, champ trop long, doublon, doublon détecté par la base) pour les services. La base de test est H2 en mémoire (mode MySQL, schéma recréé à chaque exécution) : **elle ne touche jamais à MySQL**.
+**Backend (53 tests)** : `BackendApplicationTests` (1, démarrage du contexte), `ApiIntegrationTest` (6), `NewsletterIntegrationTest` (4), `AuthIntegrationTest` (13, MockMvc : connexion, `me`, déconnexion, renouvellement de la session ; inscription réussie avec session ouverte, connexion avec le compte créé, e-mail déjà utilisé, champs vides ou invalides) et `ProfileIntegrationTest` (6 : lecture et persistance du profil ; changement d'e-mail avec session conservée et connexion avec la nouvelle adresse ; doublon et e-mail invalide sans modification des données ; refus sans session ou avec une session expirée ; impossibilité de viser un autre compte ou de modifier le mot de passe et le rôle ; refus d'une écriture venant d'une autre origine) pour les routes, `CategoryServiceTest` (2), `ProductServiceTest` (5), `NewsletterServiceTest` (4) et `AuthServiceTest` (12 : connexion ; inscription avec empreinte BCrypt, champ vide, e-mail invalide, mot de passe trop court ou trop long, champ trop long, doublon, doublon détecté par la base) pour les services. La base de test est H2 en mémoire (mode MySQL, schéma recréé à chaque exécution) : **elle ne touche jamais à MySQL**.
 
-**Frontend (76 tests, 12 fichiers)** : `CategoryList` (3), `ProductList` (5), `ProductModal` (5), `Footer` (5), `CookieBanner` (5), `ScrollToTop` (3), `Home` (3), `formatPrice` (3), `MonCompte` (7), `LoginModal` (10 : labels et attributs, champs obligatoires, message d'erreur, état de chargement, piège du focus, fermeture, retour du focus), `RegisterModal` (12 : sept champs obligatoires et leurs attributs, focus initial, champ manquant, e-mail invalide, mot de passe trop court, envoi des champs nettoyés, e-mail déjà utilisé, serveur injoignable, état de chargement, lien vers la connexion, piège du focus, fermeture) et `Header` (15 : « Bienvenue », session retrouvée, panneau du compte, déconnexion, passage connexion ↔ inscription, bienvenue après l'inscription).
+**Frontend (84 tests, 13 fichiers)** : `CategoryList` (3), `ProductList` (5), `ProductModal` (8 : contenu, focus initial dans la fenêtre, retour du focus, Échap, Fermer, piège de Tab et de Maj+Tab y compris depuis la fenêtre, blocage du défilement), `Footer` (5), `CookieBanner` (5), `ScrollToTop` (3), `Home` (3), `formatPrice` (3), `MonCompte` (7 : six champs du membre, redirection d'un visiteur avec ouverture du modal, pas de redirection pendant la vérification de session, accès depuis « Paramètres », déconnexion depuis la page ou depuis une autre page), `MonCompte.us6` (5 : lecture fraîche puis mise à jour du contexte après sauvegarde, saisies gardées après une erreur, chargement annoncé et nouvelle tentative, double soumission bloquée, session expirée oubliée), `LoginModal` (10 : labels et attributs, champs obligatoires, message d'erreur, état de chargement, piège du focus, fermeture, retour du focus), `RegisterModal` (12 : sept champs obligatoires et leurs attributs, focus initial, champ manquant, e-mail invalide, mot de passe trop court, envoi des champs nettoyés, e-mail déjà utilisé, serveur injoignable, état de chargement, lien vers la connexion, piège du focus, fermeture) et `Header` (15 : « Bienvenue », session retrouvée, panneau du compte, déconnexion, passage connexion ↔ inscription, bienvenue après l'inscription).
 
 Autres contrôles :
 
 - `npm run lint` : analyse statique avec oxlint.
 - [`docs/tests-fonctionnels.md`](tests-fonctionnels.md) : cahier de tests manuels (parcours utilisateur, accessibilité), avec les colonnes « résultat obtenu » et « statut » à remplir.
 
-Dernière exécution à la rédaction de ce document : 76/76 tests frontend et 47/47 tests backend réussis.
+Dernière exécution à la rédaction de ce document (25 novembre 2026) : 84/84 tests frontend et 53/53 tests backend réussis ; `npm run lint` sans erreur (2 avertissements : `ProductList.jsx`, mise à jour d'état dans un effet ; `Footer.jsx`, appel à `Date` pendant le rendu).
 
 ---
 
@@ -424,18 +481,13 @@ Variables d'environnement, avec leurs valeurs par défaut de développement :
 2. L'icône « Mon compte » ouvre `LoginModal`. Le visiteur saisit son e-mail (login) et son mot de passe.
 3. Le front envoie `POST /api/auth/login` avec `{ email, password }`, en HTTPS en production.
 4. `AuthService.fAuthenticate` vérifie que les champs ne sont pas vides (400 sinon), cherche le membre par e-mail (minuscules, espaces retirés) et compare le mot de passe à `password_hash` avec BCrypt. Tout échec renvoie le même 401 « Email ou mot de passe incorrect ».
-5. En cas de succès, `AuthController` invalide l'éventuelle ancienne session, en crée une nouvelle et y range l'identifiant du membre. Le serveur répond 200 avec `{ firstName, lastName, email }` et dépose le cookie `JSESSIONID`.
+5. En cas de succès, `AuthController` invalide l'éventuelle ancienne session, en crée une nouvelle et y range l'identifiant du membre. Le serveur répond 200 avec l'objet membre (prénom, nom, e-mail, adresse, code postal, ville) et dépose le cookie `JSESSIONID`.
 6. Le front mémorise le membre dans `AuthContext`, ferme le modal et le `Header` affiche « Bienvenue, [prénom] ».
 7. Après un rechargement, l'étape 1 retrouve le membre grâce au cookie.
 
 ### Flux d'une inscription
 
-1. Dans `LoginModal`, le lien « Créer un compte » remplace la fenêtre de connexion par `RegisterModal`.
-2. Le visiteur saisit son nom, son prénom, son adresse, son code postal, sa ville, son e-mail et un mot de passe d'au moins 8 caractères. Le front refait les contrôles de l'API (champs obligatoires, format de l'e-mail, longueur du mot de passe) pour éviter un aller-retour inutile, et place le focus sur le champ à corriger.
-3. Le front envoie `POST /api/auth/register`, en HTTPS en production.
-4. `AuthService.fRegister` applique toutes les règles (voir [Codes d'erreur](#codes-derreur)), calcule l'empreinte BCrypt du mot de passe et enregistre le membre avec le rôle `ROLE_USER`.
-5. `AuthController` ouvre une session neuve, exactement comme après une connexion (même méthode `fOpenSession`), et répond 201 avec `{ firstName, lastName, email }`.
-6. Le front mémorise le membre dans `AuthContext`, ferme le modal et le `Header` affiche « Bienvenue, [prénom] » sur toutes les pages.
+Le flux complet est décrit dans la [section 13](#13-flux-du-compte-membre--inscription-modification-du-profil-déconnexion). Côté sécurité : le mot de passe n'est contrôlé (8 caractères minimum, 72 octets maximum) puis transformé en empreinte BCrypt que par le serveur, et la session est ouverte avec la même méthode que la connexion (`fOpenSession`, protection contre la fixation de session).
 
 Le message 409 indique qu'un compte existe déjà pour cet e-mail : il est nécessaire pour que le visiteur comprenne le refus, mais il permet de savoir si une adresse est inscrite. Ce risque est accepté ici ; la limitation des tentatives recommandée plus bas le réduit aussi.
 
@@ -462,7 +514,7 @@ Hasher le mot de passe dans le navigateur avant de l'envoyer n'apporte aucune s�
 
 - Il n'est **jamais écrit dans les logs** : aucun log applicatif ne le reçoit et `LoginRequest.toString()` comme `RegisterRequest.toString()` le masquent (`password=***`).
 - Il n'est **jamais renvoyé dans une réponse JSON** : `AuthController` renvoie un objet dédié (`UserResponse`), pas l'entité `User`, donc `password_hash` ne sort pas non plus.
-- Il n'est **pas conservé dans le state React** après l'envoi : le champ est vidé dès la réponse (succès ou échec) et `AuthContext` ne mémorise que le prénom, le nom et l'e-mail.
+- Il n'est **pas conservé dans le state React** après l'envoi : le champ est vidé dès la réponse (succès ou échec) et `AuthContext` ne mémorise que l'objet membre renvoyé par l'API (prénom, nom, e-mail, adresse, code postal, ville).
 - Les champs utilisent `type="password"` / `autocomplete="current-password"` et `type="email"` / `autocomplete="username"` à la connexion, `autocomplete="new-password"` à l'inscription, pour que les gestionnaires de mots de passe fonctionnent (et proposent un mot de passe robuste à l'inscription).
 - Il ne dépasse pas **72 octets** : BCrypt ignore tout ce qui suit, un mot de passe plus long serait donc tronqué sans le dire. L'inscription le refuse.
 
@@ -473,3 +525,101 @@ Hasher le mot de passe dans le navigateur avant de l'envoyer n'apporte aucune s�
 ### Évolution recommandée : limiter les tentatives
 
 Cette version ne limite pas le nombre de tentatives de connexion. Il est recommandé d'ajouter, avant l'ouverture au public, un verrouillage temporaire après plusieurs échecs (par e-mail et par adresse IP) ou un délai croissant entre les essais, afin de freiner les attaques par force brute et par bourrage d'identifiants.
+
+---
+
+## 13. Flux du compte membre : inscription, modification du profil, déconnexion
+
+Le flux de la connexion est décrit dans la [section 12](#flux-dune-connexion).
+
+### Inscription
+
+```
+1. Header                         clic sur l'icône « Mon compte » (visiteur)
+        │  fSetStrAuthModal('login')
+        ▼
+2. LoginModal                     clic sur « Créer un compte »
+        │  fOnSwitchToRegister → fSetStrAuthModal('register')
+        ▼
+3. RegisterModal                  saisie des sept champs, clic sur « Créer mon compte »
+        │  fFindClientError : champ vide, e-mail invalide, mot de passe < 8 caractères ou > 72 octets
+        │  → message + focus sur le champ fautif, aucun appel à l'API
+        ▼
+4. AuthContext.fRegister          POST /auth/register  { lastName, firstName, address, postalCode, city, email, password }
+        ▼                         (valeurs nettoyées par trim, sauf le mot de passe)
+5. AuthController.fRegister
+        ▼
+6. AuthService.fRegister          champs obligatoires, longueurs, format de l'e-mail, mot de passe,
+        │                          doublon (findByEmail), empreinte BCrypt
+        ▼
+7. UserRepository.saveAndFlush    INSERT INTO users …  (rôle ROLE_USER par défaut)
+        ▼
+8. AuthController.fOpenSession    ancienne session invalidée, nouvelle session avec userId
+        │  201 + objet membre + cookie JSESSIONID
+        ▼
+9. AuthContext                    objUser = réponse
+        ▼
+10. RegisterModal / Header        formulaire vidé, modal fermé (focus rendu à l'icône),
+                                  « Bienvenue, [prénom] »
+```
+
+En cas d'erreur (400 ou 409), `fRegister` lève une erreur portant le message de l'API et le code HTTP (`intStatus`, 0 si le serveur n'a pas répondu, avec le message « Inscription impossible pour le moment. Veuillez réessayer plus tard. »). `RegisterModal` vide le mot de passe, garde les autres champs et place le focus sur l'e-mail (409) ou sur le mot de passe.
+
+### Modification du profil
+
+```
+1. Header                         « Paramètres » dans le panneau du compte → navigation vers /mon-compte
+        ▼
+2. MemberRoute                    blChecking ? rien : objUser ? la page : redirection vers /
+        ▼
+3. MonCompte (montage)            fRefreshProfile() → GET /auth/me
+        │                          → objUser mis à jour, formulaire rempli avec les six champs
+        ▼
+4. MonCompte.fSave                clic sur « Enregistrer les modifications »
+        │                          (validation du navigateur : required, type email, maxLength)
+        │  objSavingRef bloque une double soumission ; fieldset désactivé
+        ▼
+5. AuthContext.fUpdateProfile     PUT /auth/me  { firstName, lastName, email, address, postalCode, city }
+        ▼                         (cookie de session + en-tête Origin ajouté par le navigateur)
+6. CorsConfig                     Origin non autorisée → 403 « Invalid CORS request »
+        ▼
+7. AuthController.fUpdateMe       session et userId ? sinon 401 ; Origin ≠ origine autorisée ? 403
+        ▼
+8. AuthService.fUpdateProfile     membre existant (401), champs obligatoires (400), nettoyage,
+        │  (@Transactional)        longueurs (400), format de l'e-mail (400),
+        │                          e-mail d'un autre membre (409)
+        ▼
+9. UserRepository.saveAndFlush    UPDATE users SET first_name, last_name, email, address,
+        │                          postal_code, city  (password_hash et role inchangés)
+        │  200 + objet membre
+        ▼
+10. AuthContext                   objUser = réponse → le Header affiche le nouveau prénom
+        ▼
+11. MonCompte                     formulaire remis aux valeurs enregistrées (nettoyées),
+                                  « Vos informations ont été mises à jour. »
+```
+
+En cas d'erreur, `MonCompte` affiche `response.data.message` (ou « Impossible d'enregistrer les modifications. Veuillez réessayer. » si le serveur n'a pas répondu) et garde les saisies. Sur un 401, `fUpdateProfile` remet `objUser` à `null` : `MemberRoute` redirige vers l'accueil, sans ouvrir le modal de connexion.
+
+### Déconnexion
+
+```
+1. Header                         clic sur l'icône « Mon compte » (membre) → panneau ouvert,
+        │                          focus sur « Paramètres »
+        ▼
+2. Header.fHandleLogout           clic sur « Se déconnecter »
+        ▼
+3. AuthContext.fLogout            POST /auth/logout
+        ▼
+4. AuthController.fLogout         session existante ? invalidate()  →  204 dans tous les cas
+        ▼
+5. AuthContext                    objUser = null
+        ▼
+6. Header                         panneau fermé, focus rendu à l'icône, « Bienvenue » retiré ;
+        │                          l'icône rouvre désormais le modal de connexion
+        ▼
+7. MemberRoute (si /mon-compte)   le membre du rendu précédent existait → redirection vers /,
+                                  sans ouvrir le modal de connexion
+```
+
+Sur toute autre page, le visiteur reste où il était. Si l'API ne répond pas, `fLogout` lève l'erreur « Déconnexion impossible pour le moment. Veuillez réessayer plus tard. » **sans** remettre `objUser` à `null` (la session existe encore côté serveur) : le `Header` affiche le message dans la zone `role="alert"` du panneau, qui reste ouvert. Après la déconnexion, un rechargement appelle `GET /api/auth/me`, qui répond 401 : le visiteur reste déconnecté.
