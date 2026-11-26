@@ -294,11 +294,7 @@ Si le changement réussit, le message **« Votre mot de passe a été modifié. 
 
 Un message en rouge s'affiche en haut de la section et votre mot de passe reste inchangé. Vous restez connecté(e).
 
-Le curseur se place ensuite :
-
-- sur **« Mot de passe actuel »** si ce mot de passe est incorrect, si la confirmation ne correspond pas au nouveau mot de passe, ou si le serveur ne répond pas ;
-- sur **« Nouveau mot de passe »** s'il est trop court, trop long ou identique à l'actuel ;
-- sur le **premier champ resté vide**, s'il en manque un.
+Quel que soit le message, les trois champs sont vidés et le curseur revient sur **« Mot de passe actuel »** : ressaisissez les trois mots de passe.
 
 | Message affiché | Ce que cela signifie | Que faire |
 |-----------------|----------------------|-----------|

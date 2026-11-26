@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Home from './Home';
 import objApi from '../services/api';
@@ -42,7 +42,8 @@ describe('Home', () => {
 
         await screen.findByText('Homme');
 
-        expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(1);
+        // Le défilement part d'un effet qui peut s'exécuter après l'affichage des univers : on l'attend
+        await waitFor(() => expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(1));
     });
 
     it("ne descend pas sans ancre ni catégorie choisie", async () => {
@@ -58,6 +59,7 @@ describe('Home', () => {
 
         await screen.findByText('Homme', { selector: '.universe-card__name' });
 
-        expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+        // Même attente : l'affichage des univers précède le défilement
+        await waitFor(() => expect(Element.prototype.scrollIntoView).toHaveBeenCalled());
     });
 });
