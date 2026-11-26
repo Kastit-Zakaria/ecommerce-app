@@ -23,6 +23,12 @@ public class AuthService {
     public static final int INT_PASSWORD_MIN_LENGTH = 8;
     private static final int INT_PASSWORD_MAX_BYTES = 72;
 
+    // Messages du changement de mot de passe
+    public static final String STR_CURRENT_PASSWORD_INCORRECT = "Le mot de passe actuel est incorrect.";
+    public static final String STR_PASSWORD_CONFIRMATION_MISMATCH =
+            "La confirmation ne correspond pas au nouveau mot de passe.";
+    public static final String STR_PASSWORD_UNCHANGED = "Le nouveau mot de passe doit être différent de l'actuel.";
+
     // Forme minimale d'un email : quelque chose, une arobase, un domaine avec un point, sans espace
     private static final Pattern OBJ_EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
@@ -97,15 +103,7 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "L'adresse e-mail n'est pas valide.");
         }
 
-        if (strPassword.length() < INT_PASSWORD_MIN_LENGTH) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Le mot de passe doit contenir au moins " + INT_PASSWORD_MIN_LENGTH + " caractères.");
-        }
-
-        // BCrypt n'utilise que les 72 premiers octets : au-delà, le mot de passe serait tronqué sans le dire
-        if (strPassword.getBytes(StandardCharsets.UTF_8).length > INT_PASSWORD_MAX_BYTES) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le mot de passe est trop long.");
-        }
+        fCheckPasswordRules(strPassword);
 
         if (objUserRepository.findByEmail(strCleanEmail).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, STR_EMAIL_ALREADY_USED);
@@ -171,6 +169,67 @@ public class AuthService {
             // L'index unique protège aussi contre deux changements simultanés vers le même email.
             throw new ResponseStatusException(HttpStatus.CONFLICT, STR_EMAIL_ALREADY_USED);
         }
+    }
+
+    // fChangePassword : remplace le mot de passe d'un membre connecté
+    // Reçoit : lngId (l'identifiant stocké dans la session), strCurrentPassword (le mot de passe actuel),
+    //          strNewPassword (le nouveau), strConfirmation (sa seconde saisie) ; aucun n'est journalisé
+    // Renvoie : le membre mis à jour ; erreur 401 s'il n'existe plus, 400 si un champ est vide, si le mot de passe
+    //           actuel est faux, ou si le nouveau est invalide, mal confirmé ou identique à l'actuel
+    // Pourquoi : n'autoriser le changement qu'à la personne qui connaît le mot de passe actuel
+    @org.springframework.transaction.annotation.Transactional
+    public User fChangePassword(Long lngId, String strCurrentPassword, String strNewPassword, String strConfirmation) {
+        User objUser = fFindById(lngId);
+        if (objUser == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Non connecté.");
+        }
+
+        // Les mots de passe ne sont jamais rognés : les espaces en font partie, comme à l'inscription
+        if (fIsEmpty(strCurrentPassword) || fIsEmpty(strNewPassword) || fIsEmpty(strConfirmation)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, STR_REQUIRED_FIELDS);
+        }
+
+        // 400 et non 401 : la session reste valable, le membre ne doit pas être déconnecté
+        if (!objPasswordEncoder.matches(strCurrentPassword, objUser.getPasswordHash())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, STR_CURRENT_PASSWORD_INCORRECT);
+        }
+
+        fCheckPasswordRules(strNewPassword);
+
+        if (!strNewPassword.equals(strConfirmation)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, STR_PASSWORD_CONFIRMATION_MISMATCH);
+        }
+
+        if (strNewPassword.equals(strCurrentPassword)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, STR_PASSWORD_UNCHANGED);
+        }
+
+        objUser.setPasswordHash(objPasswordEncoder.encode(strNewPassword));
+        return objUserRepository.saveAndFlush(objUser);
+    }
+
+    // fCheckPasswordRules : vérifie qu'un mot de passe choisi respecte les règles du site
+    // Reçoit : strPassword, le mot de passe choisi (non vide, jamais journalisé)
+    // Renvoie : rien ; erreur 400 s'il est trop court ou trop long
+    // Pourquoi : appliquer les mêmes règles et les mêmes messages à l'inscription et au changement de mot de passe
+    private void fCheckPasswordRules(String strPassword) {
+        if (strPassword.length() < INT_PASSWORD_MIN_LENGTH) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Le mot de passe doit contenir au moins " + INT_PASSWORD_MIN_LENGTH + " caractères.");
+        }
+
+        // BCrypt n'utilise que les 72 premiers octets : au-delà, le mot de passe serait tronqué sans le dire
+        if (strPassword.getBytes(StandardCharsets.UTF_8).length > INT_PASSWORD_MAX_BYTES) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le mot de passe est trop long.");
+        }
+    }
+
+    // fIsEmpty : indique si un mot de passe est absent ou vide
+    // Reçoit : strValue, la valeur saisie
+    // Renvoie : true si rien n'a été saisi
+    // Pourquoi : contrairement aux autres champs, un mot de passe peut contenir uniquement des espaces
+    private boolean fIsEmpty(String strValue) {
+        return strValue == null || strValue.isEmpty();
     }
 
     // fIsBlank : indique si un champ texte est absent ou ne contient que des espaces

@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -253,5 +254,139 @@ class AuthServiceTest {
 
         assertEquals(HttpStatus.CONFLICT, objException.getStatusCode());
         assertEquals(AuthService.STR_EMAIL_ALREADY_USED, objException.getReason());
+    }
+
+    // fAssertPasswordChangeRefused : vérifie qu'un changement de mot de passe est refusé sans rien modifier
+    // Reçoit : strReason (le message attendu), strCurrent, strNew, strConfirmation (la saisie à tester)
+    // Renvoie : rien
+    // Pourquoi : factoriser la vérification commune aux cas de refus (400, empreinte intacte)
+    private void fAssertPasswordChangeRefused(String strReason, String strCurrent, String strNew, String strConfirmation) {
+        when(objUserRepository.findById(1L)).thenReturn(Optional.of(objUser));
+        String strHashBefore = objUser.getPasswordHash();
+
+        ResponseStatusException objException = assertThrows(ResponseStatusException.class,
+                () -> objAuthService.fChangePassword(1L, strCurrent, strNew, strConfirmation));
+
+        assertEquals(HttpStatus.BAD_REQUEST, objException.getStatusCode());
+        assertEquals(strReason, objException.getReason());
+        assertEquals(strHashBefore, objUser.getPasswordHash());
+        verify(objUserRepository, never()).saveAndFlush(any());
+    }
+
+    // fChangePassword_enregistreUneNouvelleEmpreinteBCrypt : cas nominal
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : seul le nouveau mot de passe doit ensuite être reconnu, et jamais stocké en clair
+    @Test
+    void fChangePassword_enregistreUneNouvelleEmpreinteBCrypt() {
+        when(objUserRepository.findById(1L)).thenReturn(Optional.of(objUser));
+        when(objUserRepository.saveAndFlush(objUser)).thenReturn(objUser);
+
+        User objResult = objAuthService.fChangePassword(1L, "MotDePasse-1", "MotDePasse-2", "MotDePasse-2");
+
+        assertNotEquals("MotDePasse-2", objResult.getPasswordHash());
+        assertTrue(objPasswordEncoder.matches("MotDePasse-2", objResult.getPasswordHash()));
+        assertFalse(objPasswordEncoder.matches("MotDePasse-1", objResult.getPasswordHash()));
+        assertEquals("camille@exemple.com", objResult.getEmail());
+        assertEquals("ROLE_USER", objResult.getRole());
+        verify(objUserRepository).saveAndFlush(objUser);
+    }
+
+    // fChangePassword_accepteLesLongueursLimites : exactement 8 caractères, puis exactement 72 octets
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : les bornes sont incluses, comme à l'inscription
+    @Test
+    void fChangePassword_accepteLesLongueursLimites() {
+        when(objUserRepository.findById(1L)).thenReturn(Optional.of(objUser));
+        when(objUserRepository.saveAndFlush(objUser)).thenReturn(objUser);
+        String strLongest = "a".repeat(72);
+
+        objAuthService.fChangePassword(1L, "MotDePasse-1", "Huit-car", "Huit-car");
+        assertTrue(objPasswordEncoder.matches("Huit-car", objUser.getPasswordHash()));
+
+        objAuthService.fChangePassword(1L, "Huit-car", strLongest, strLongest);
+        assertTrue(objPasswordEncoder.matches(strLongest, objUser.getPasswordHash()));
+    }
+
+    // fChangePassword_refuseUnChampVide : chacun des trois champs, vide ou absent
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : les trois champs sont obligatoires
+    @Test
+    void fChangePassword_refuseUnChampVide() {
+        String strMessage = AuthService.STR_REQUIRED_FIELDS;
+
+        fAssertPasswordChangeRefused(strMessage, "", "MotDePasse-2", "MotDePasse-2");
+        fAssertPasswordChangeRefused(strMessage, null, "MotDePasse-2", "MotDePasse-2");
+        fAssertPasswordChangeRefused(strMessage, "MotDePasse-1", "", "MotDePasse-2");
+        fAssertPasswordChangeRefused(strMessage, "MotDePasse-1", null, "MotDePasse-2");
+        fAssertPasswordChangeRefused(strMessage, "MotDePasse-1", "MotDePasse-2", "");
+        fAssertPasswordChangeRefused(strMessage, "MotDePasse-1", "MotDePasse-2", null);
+    }
+
+    // fChangePassword_refuseUnMotDePasseActuelFaux : mot de passe actuel erroné, même très long
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : seule la personne qui connaît le mot de passe actuel peut le changer
+    @Test
+    void fChangePassword_refuseUnMotDePasseActuelFaux() {
+        String strMessage = AuthService.STR_CURRENT_PASSWORD_INCORRECT;
+
+        fAssertPasswordChangeRefused(strMessage, "autre-chose", "MotDePasse-2", "MotDePasse-2");
+        fAssertPasswordChangeRefused(strMessage, " MotDePasse-1 ", "MotDePasse-2", "MotDePasse-2");
+        fAssertPasswordChangeRefused(strMessage, "a".repeat(100), "MotDePasse-2", "MotDePasse-2");
+    }
+
+    // fChangePassword_refuseUnNouveauTropCourtOuTropLong : mêmes règles et messages que l'inscription
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : le changement ne doit pas permettre un mot de passe refusé à l'inscription
+    @Test
+    void fChangePassword_refuseUnNouveauTropCourtOuTropLong() {
+        fAssertPasswordChangeRefused("Le mot de passe doit contenir au moins 8 caractères.",
+                "MotDePasse-1", "Court-1", "Court-1");
+        fAssertPasswordChangeRefused("Le mot de passe est trop long.",
+                "MotDePasse-1", "a".repeat(73), "a".repeat(73));
+        // 37 caractères accentués = 74 octets : la limite porte sur les octets, pas sur les caractères
+        fAssertPasswordChangeRefused("Le mot de passe est trop long.",
+                "MotDePasse-1", "é".repeat(37), "é".repeat(37));
+    }
+
+    // fChangePassword_refuseUneConfirmationDifferente : les deux saisies du nouveau mot de passe diffèrent
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : éviter qu'une faute de frappe bloque le compte
+    @Test
+    void fChangePassword_refuseUneConfirmationDifferente() {
+        fAssertPasswordChangeRefused(AuthService.STR_PASSWORD_CONFIRMATION_MISMATCH,
+                "MotDePasse-1", "MotDePasse-2", "MotDePasse-3");
+        fAssertPasswordChangeRefused(AuthService.STR_PASSWORD_CONFIRMATION_MISMATCH,
+                "MotDePasse-1", "MotDePasse-2", "motdepasse-2");
+    }
+
+    // fChangePassword_refuseUnMotDePasseIdentique : le nouveau est le mot de passe actuel
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : un changement doit réellement changer le mot de passe
+    @Test
+    void fChangePassword_refuseUnMotDePasseIdentique() {
+        fAssertPasswordChangeRefused(AuthService.STR_PASSWORD_UNCHANGED,
+                "MotDePasse-1", "MotDePasse-1", "MotDePasse-1");
+    }
+
+    // fChangePassword_refuseUnMembreDisparu : la session désigne un compte supprimé
+    // Reçoit : rien
+    // Renvoie : rien
+    // Pourquoi : garantir un 401 sans rien enregistrer
+    @Test
+    void fChangePassword_refuseUnMembreDisparu() {
+        when(objUserRepository.findById(1L)).thenReturn(Optional.empty());
+
+        ResponseStatusException objException = assertThrows(ResponseStatusException.class,
+                () -> objAuthService.fChangePassword(1L, "MotDePasse-1", "MotDePasse-2", "MotDePasse-2"));
+
+        assertEquals(HttpStatus.UNAUTHORIZED, objException.getStatusCode());
+        verify(objUserRepository, never()).saveAndFlush(any());
     }
 }

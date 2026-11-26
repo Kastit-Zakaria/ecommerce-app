@@ -46,6 +46,16 @@ public class AuthController {
         }
     }
 
+    // PasswordRequest : corps JSON attendu par le changement de mot de passe
+    // { "currentPassword", "newPassword", "confirmation" }
+    // toString est redéfini pour qu'aucun mot de passe n'apparaisse jamais dans un log
+    public record PasswordRequest(String currentPassword, String newPassword, String confirmation) {
+        @Override
+        public String toString() {
+            return "PasswordRequest[currentPassword=***, newPassword=***, confirmation=***]";
+        }
+    }
+
     // UserResponse : ce que l'API renvoie d'un membre (jamais le mot de passe ni son empreinte)
     public record UserResponse(String firstName, String lastName, String email, String address, String postalCode, String city) {
     }
@@ -102,7 +112,8 @@ public class AuthController {
     // fOpenSession : ouvre une session HTTP neuve pour un membre
     // Reçoit : objHttpRequest (la requête en cours), objUser (le membre à connecter)
     // Renvoie : rien
-    // Pourquoi : partager la même ouverture de session entre la connexion et l'inscription
+    // Pourquoi : partager la même ouverture de session entre la connexion, l'inscription
+    //            et le changement de mot de passe
     private void fOpenSession(HttpServletRequest objHttpRequest, User objUser) {
         // Protection contre la fixation de session : l'ancienne session est détruite, une nouvelle est créée
         HttpSession objOldSession = objHttpRequest.getSession(false);
@@ -150,18 +161,50 @@ public class AuthController {
     @PutMapping("/me")
     public ResponseEntity<UserResponse> fUpdateMe(@RequestBody ProfileRequest objRequest,
                                                   HttpServletRequest objHttpRequest) {
+        Long lngUserId = fRequireUserId(objHttpRequest);
+        fCheckOrigin(objHttpRequest);
+        User objUser = objAuthService.fUpdateProfile(lngUserId, objRequest.firstName(), objRequest.lastName(),
+                objRequest.email(), objRequest.address(), objRequest.postalCode(), objRequest.city());
+        return ResponseEntity.ok(fToResponse(objUser));
+    }
+
+    // fChangePassword : change le mot de passe du membre connecté (PUT /api/auth/me/password)
+    // Reçoit : objRequest (mot de passe actuel, nouveau et confirmation), objHttpRequest (pour la session)
+    // Renvoie : 204 sans contenu ; 400 si la saisie est refusée ; 401 sans session ; 403 si l'origine est refusée
+    // Pourquoi : permettre au membre de modifier son mot de passe tout en restant connecté
+    @PutMapping("/me/password")
+    public ResponseEntity<Void> fChangePassword(@RequestBody PasswordRequest objRequest,
+                                                HttpServletRequest objHttpRequest) {
+        Long lngUserId = fRequireUserId(objHttpRequest);
+        fCheckOrigin(objHttpRequest);
+        User objUser = objAuthService.fChangePassword(lngUserId, objRequest.currentPassword(),
+                objRequest.newPassword(), objRequest.confirmation());
+        // La session est renouvelée après le changement (protection contre la fixation de session)
+        fOpenSession(objHttpRequest, objUser);
+        return ResponseEntity.noContent().build();
+    }
+
+    // fRequireUserId : lit l'identifiant du membre dans la session
+    // Reçoit : objHttpRequest (la requête en cours)
+    // Renvoie : l'identifiant du membre connecté ; erreur 401 sans session
+    // Pourquoi : réserver les modifications du compte au membre connecté, sans faire confiance au client
+    private Long fRequireUserId(HttpServletRequest objHttpRequest) {
         HttpSession objSession = objHttpRequest.getSession(false);
         if (objSession == null || !(objSession.getAttribute(STR_SESSION_USER_ID) instanceof Long lngUserId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Non connecté.");
         }
-        // Protection de cette écriture par cookie contre les requêtes d'une autre origine.
+        return lngUserId;
+    }
+
+    // fCheckOrigin : refuse une requête envoyée par une autre origine que le front
+    // Reçoit : objHttpRequest (la requête en cours)
+    // Renvoie : rien ; erreur 403 si l'en-tête Origin désigne une origine non autorisée
+    // Pourquoi : protéger les écritures authentifiées par cookie contre les requêtes d'un autre site
+    private void fCheckOrigin(HttpServletRequest objHttpRequest) {
         String strOrigin = objHttpRequest.getHeader("Origin");
         if (strOrigin != null && !strAllowedOrigin.equals(strOrigin)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Origine non autorisée.");
         }
-        User objUser = objAuthService.fUpdateProfile(lngUserId, objRequest.firstName(), objRequest.lastName(),
-                objRequest.email(), objRequest.address(), objRequest.postalCode(), objRequest.city());
-        return ResponseEntity.ok(fToResponse(objUser));
     }
 
     // fLogout : déconnecte le membre (POST /api/auth/logout)

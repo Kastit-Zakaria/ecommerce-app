@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import useAuth from '../context/useAuth';
+import PasswordForm from '../components/PasswordForm';
 
 const arrFields = [
     { strKey: 'firstName', strLabel: 'Prénom', intMax: 100, strAuto: 'given-name' },
@@ -84,6 +85,7 @@ const MonCompte = () => {
                     </fieldset>
                 </form>
             )}
+            {!blLoading && objForm && <PasswordForm />}
         </main>
     );
 };
