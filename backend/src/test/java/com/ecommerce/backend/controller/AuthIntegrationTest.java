@@ -257,7 +257,8 @@ class AuthIntegrationTest {
     void fRegister_refuseUnEmailDejaUtilise() throws Exception {
         fPostRegister(String.format(STR_REGISTER_BODY, "Camille@Exemple.com"))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Un compte existe déjà avec cette adresse e-mail."));
+                .andExpect(jsonPath("$.message").value("Un compte existe déjà avec cette adresse e-mail."))
+                .andExpect(jsonPath("$.field").doesNotExist());
     }
 
     // fRegister_refuseLesChampsVidesOuInvalides : champ manquant, email invalide, mot de passe trop court
@@ -268,12 +269,15 @@ class AuthIntegrationTest {
     void fRegister_refuseLesChampsVidesOuInvalides() throws Exception {
         fPostRegister("{}")
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Tous les champs sont obligatoires."));
+                .andExpect(jsonPath("$.message").value("Tous les champs sont obligatoires."))
+                .andExpect(jsonPath("$.field").doesNotExist());
         fPostRegister(String.format(STR_REGISTER_BODY, "pas-un-email"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("L'adresse e-mail n'est pas valide."));
+                .andExpect(jsonPath("$.message").value("L'adresse e-mail n'est pas valide."))
+                .andExpect(jsonPath("$.field").doesNotExist());
         fPostRegister(String.format(STR_REGISTER_BODY, "alex@exemple.com").replace("MotDePasse-2", "court"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Le mot de passe doit contenir au moins 8 caractères."));
+                .andExpect(jsonPath("$.message").value("Le mot de passe doit contenir au moins 8 caractères."))
+                .andExpect(jsonPath("$.field").doesNotExist());
     }
 }

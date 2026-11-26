@@ -1,0 +1,19 @@
+{
+  "name": "generer-pdf",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Génération des PDF de la documentation SERA à partir des fichiers Markdown",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "pregenerer": "npm install --no-audit --no-fund --loglevel=error",
+    "generer": "node generer.mjs"
+  },
+  "dependencies": {
+    "@fontsource/jost": "^5.3.0",
+    "marked": "^18.3.0",
+    "pdf-lib": "^1.17.1"
+  }
+}

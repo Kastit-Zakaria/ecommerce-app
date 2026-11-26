@@ -59,6 +59,8 @@
 .account-page__fields:disabled .account-page__save { cursor: wait; }
 .account-page__error { color: #9d2020; }
 .account-page__success { color: #256032; }
+/* Confirmation : reçoit le focus après un envoi réussi */
+.account-page__success:focus-visible { outline: 2px solid #333; outline-offset: 3px; }
 @media (max-width: 600px) { .account-page__save { width: 100%; } }
 
 /* Section « Modifier mon mot de passe », séparée des informations personnelles */

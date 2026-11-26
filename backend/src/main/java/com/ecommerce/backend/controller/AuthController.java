@@ -2,6 +2,7 @@ package com.ecommerce.backend.controller;
 
 import com.ecommerce.backend.entity.User;
 import com.ecommerce.backend.service.AuthService;
+import com.ecommerce.backend.service.FieldErrorException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -220,12 +222,18 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    // fHandleError : transforme l'erreur du service en réponse JSON { "message": "..." }
-    // Reçoit : objException, l'erreur levée (400, 401 ou 409)
-    // Renvoie : la réponse avec le même code HTTP et le message en français
-    // Pourquoi : permettre au front d'afficher un message clair
+    // fHandleError : transforme une erreur en réponse JSON { "message": "...", "field": "..." }
+    // Reçoit : objException, l'erreur levée (400, 401, 403 ou 409)
+    // Renvoie : la réponse avec le même code HTTP et le message en français ; "field" n'est présent
+    //           que si l'erreur désigne un champ à corriger
+    // Pourquoi : permettre au front d'afficher un message clair et de placer le curseur sur le bon champ
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, String>> fHandleError(ResponseStatusException objException) {
-        return ResponseEntity.status(objException.getStatusCode()).body(Map.of("message", objException.getReason()));
+        Map<String, String> objBody = new LinkedHashMap<>();
+        objBody.put("message", objException.getReason());
+        if (objException instanceof FieldErrorException objFieldError) {
+            objBody.put("field", objFieldError.fGetField());
+        }
+        return ResponseEntity.status(objException.getStatusCode()).body(objBody);
     }
 }

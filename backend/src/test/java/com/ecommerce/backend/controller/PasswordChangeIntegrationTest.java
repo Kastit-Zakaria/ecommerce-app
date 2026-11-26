@@ -90,17 +90,23 @@ class PasswordChangeIntegrationTest {
                 + "\",\"confirmation\":\"" + strConfirmation + "\"}";
     }
 
-    // fAssertRefused : vérifie un refus 400 avec son message, sans changement en base ni déconnexion
-    // Reçoit : strBody (le corps envoyé), strMessage (le message attendu)
+    // fAssertRefused : vérifie un refus 400 avec son message et son champ, sans changement en base ni déconnexion
+    // Reçoit : strBody (le corps envoyé), strMessage (le message attendu),
+    //          strField (le champ attendu dans "field", ou null si la réponse ne doit pas en désigner)
     // Renvoie : rien
     // Pourquoi : factoriser la vérification commune aux saisies refusées
-    private void fAssertRefused(String strBody, String strMessage) throws Exception {
-        objMockMvc.perform(put(STR_URL).session(objSession)
+    private void fAssertRefused(String strBody, String strMessage, String strField) throws Exception {
+        ResultActions objResult = objMockMvc.perform(put(STR_URL).session(objSession)
                         .contentType(MediaType.APPLICATION_JSON).content(strBody))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(strMessage))
                 .andExpect(jsonPath("$.currentPassword").doesNotExist())
                 .andExpect(jsonPath("$.newPassword").doesNotExist());
+        if (strField == null) {
+            objResult.andExpect(jsonPath("$.field").doesNotExist());
+        } else {
+            objResult.andExpect(jsonPath("$.field").value(strField));
+        }
 
         fAssertPasswordUnchanged();
         assertFalse(objSession.isInvalid());
@@ -155,17 +161,17 @@ class PasswordChangeIntegrationTest {
     @Test
     void fMotDePasseActuelFaux() throws Exception {
         fAssertRefused(fBody("Faux-mot-de-passe", STR_NEW_PASSWORD, STR_NEW_PASSWORD),
-                AuthService.STR_CURRENT_PASSWORD_INCORRECT);
+                AuthService.STR_CURRENT_PASSWORD_INCORRECT, "currentPassword");
     }
 
     // fConfirmationDifferente : les deux saisies du nouveau mot de passe diffèrent
     // Reçoit : rien
     // Renvoie : rien
-    // Pourquoi : rien ne doit être enregistré
+    // Pourquoi : rien ne doit être enregistré ; aucun champ n'est désigné, la saisie reprend au premier
     @Test
     void fConfirmationDifferente() throws Exception {
         fAssertRefused(fBody(STR_OLD_PASSWORD, STR_NEW_PASSWORD, "MotDePasse-3"),
-                AuthService.STR_PASSWORD_CONFIRMATION_MISMATCH);
+                AuthService.STR_PASSWORD_CONFIRMATION_MISMATCH, null);
     }
 
     // fNouveauTropCourtOuTropLong : mêmes messages qu'à l'inscription
@@ -175,9 +181,9 @@ class PasswordChangeIntegrationTest {
     @Test
     void fNouveauTropCourtOuTropLong() throws Exception {
         fAssertRefused(fBody(STR_OLD_PASSWORD, "Court-1", "Court-1"),
-                "Le mot de passe doit contenir au moins 8 caractères.");
+                "Le mot de passe doit contenir au moins 8 caractères.", "newPassword");
         fAssertRefused(fBody(STR_OLD_PASSWORD, "a".repeat(73), "a".repeat(73)),
-                "Le mot de passe est trop long.");
+                "Le mot de passe est trop long.", "newPassword");
     }
 
     // fNouveauIdentique : le nouveau mot de passe est l'actuel
@@ -187,7 +193,7 @@ class PasswordChangeIntegrationTest {
     @Test
     void fNouveauIdentique() throws Exception {
         fAssertRefused(fBody(STR_OLD_PASSWORD, STR_OLD_PASSWORD, STR_OLD_PASSWORD),
-                AuthService.STR_PASSWORD_UNCHANGED);
+                AuthService.STR_PASSWORD_UNCHANGED, "newPassword");
     }
 
     // fChampVideOuAbsent : un champ vide, ou un corps sans aucun champ
@@ -196,10 +202,15 @@ class PasswordChangeIntegrationTest {
     // Pourquoi : les trois champs sont obligatoires
     @Test
     void fChampVideOuAbsent() throws Exception {
-        fAssertRefused(fBody("", STR_NEW_PASSWORD, STR_NEW_PASSWORD), AuthService.STR_REQUIRED_FIELDS);
-        fAssertRefused(fBody(STR_OLD_PASSWORD, "", STR_NEW_PASSWORD), AuthService.STR_REQUIRED_FIELDS);
-        fAssertRefused(fBody(STR_OLD_PASSWORD, STR_NEW_PASSWORD, ""), AuthService.STR_REQUIRED_FIELDS);
-        fAssertRefused("{}", AuthService.STR_REQUIRED_FIELDS);
+        fAssertRefused(fBody("", STR_NEW_PASSWORD, STR_NEW_PASSWORD),
+                AuthService.STR_REQUIRED_FIELDS, "currentPassword");
+        fAssertRefused(fBody(STR_OLD_PASSWORD, "", STR_NEW_PASSWORD),
+                AuthService.STR_REQUIRED_FIELDS, "newPassword");
+        fAssertRefused(fBody(STR_OLD_PASSWORD, STR_NEW_PASSWORD, ""),
+                AuthService.STR_REQUIRED_FIELDS, "confirmation");
+        // Plusieurs champs vides : le premier est désigné
+        fAssertRefused(fBody(STR_OLD_PASSWORD, "", ""), AuthService.STR_REQUIRED_FIELDS, "newPassword");
+        fAssertRefused("{}", AuthService.STR_REQUIRED_FIELDS, "currentPassword");
     }
 
     // fNonConnecte : requête sans session, puis session d'un compte supprimé
@@ -212,7 +223,8 @@ class PasswordChangeIntegrationTest {
 
         objMockMvc.perform(put(STR_URL).contentType(MediaType.APPLICATION_JSON).content(strBody))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("Non connecté."));
+                .andExpect(jsonPath("$.message").value("Non connecté."))
+                .andExpect(jsonPath("$.field").doesNotExist());
         objMockMvc.perform(put(STR_URL).session(new MockHttpSession())
                         .contentType(MediaType.APPLICATION_JSON).content(strBody))
                 .andExpect(status().isUnauthorized());

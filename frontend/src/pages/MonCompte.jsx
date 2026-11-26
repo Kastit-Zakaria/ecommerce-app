@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import useAuth from '../context/useAuth';
 import PasswordForm from '../components/PasswordForm';
+import useFocusAfterSubmit from '../hooks/useFocusAfterSubmit';
+import fFindErrorField from '../utils/findErrorField';
 
 const arrFields = [
     { strKey: 'firstName', strLabel: 'Prénom', intMax: 100, strAuto: 'given-name' },
@@ -24,6 +26,8 @@ const MonCompte = () => {
     const [strSuccess, fSetStrSuccess] = useState('');
     const [intRetry, fSetIntRetry] = useState(0);
     const objSavingRef = useRef(false);
+    // Champs et message de confirmation, pour y placer le focus après l'enregistrement
+    const { fSetTargetRef, fRequestFocus } = useFocusAfterSubmit();
     // La lecture dépend de l'ouverture de la page ou d'une nouvelle tentative.
 
     useEffect(() => {
@@ -36,7 +40,8 @@ const MonCompte = () => {
     }, [intRetry, fRefreshProfile]);
 
     // fSave : enregistre le formulaire.
-    // Reçoit : la soumission. Renvoie : une promesse. Pourquoi : sauvegarder sans perdre les saisies en cas d'erreur.
+    // Reçoit : la soumission. Renvoie : une promesse. Pourquoi : sauvegarder sans perdre les saisies en cas d'erreur,
+    // puis placer le focus sur la confirmation ou sur le champ à corriger.
     const fSave = async (objEvent) => {
         objEvent.preventDefault();
         if (objSavingRef.current) return;
@@ -48,8 +53,10 @@ const MonCompte = () => {
             const objProfile = await fUpdateProfile(objForm);
             fSetObjForm(fEditable(objProfile));
             fSetStrSuccess('Vos informations ont été mises à jour.');
+            fRequestFocus('success');
         } catch (objError) {
             fSetStrError(objError.response?.data?.message || "Impossible d'enregistrer les modifications. Veuillez réessayer.");
+            fRequestFocus(fFindErrorField(objError, arrFields.map(({ strKey }) => strKey)));
         } finally {
             objSavingRef.current = false;
             fSetBlSaving(false);
@@ -64,7 +71,12 @@ const MonCompte = () => {
             <h1 className="account-page__title">Mon compte</h1>
             {blLoading && <p role="status">Chargement de vos informations…</p>}
             {strError && <p className="account-page__error" role="alert">{strError}</p>}
-            {strSuccess && <p className="account-page__success" role="status">{strSuccess}</p>}
+            {strSuccess && (
+                <p className="account-page__success" role="status" tabIndex={-1}
+                    ref={(objElement) => { fSetTargetRef('success', objElement); }}>
+                    {strSuccess}
+                </p>
+            )}
             {!blLoading && !objForm && <button type="button" onClick={() => { fSetBlLoading(true); fSetStrError(''); fSetIntRetry((intValue) => intValue + 1); }}>Réessayer</button>}
             {!blLoading && objForm && (
                 <form aria-label="Informations personnelles" onSubmit={fSave}>
@@ -74,6 +86,7 @@ const MonCompte = () => {
                             <div className="account-page__row" key={strKey}>
                                 <label className="account-page__label" htmlFor={`account-${strKey}`}>{strLabel}</label>
                                 <input id={`account-${strKey}`} name={strKey} type={strType || 'text'}
+                                    ref={(objElement) => { fSetTargetRef(strKey, objElement); }}
                                     value={objForm[strKey]} maxLength={intMax} autoComplete={strAuto} required
                                     onChange={(objEvent) => {
                                         fSetObjForm({ ...objForm, [strKey]: objEvent.target.value });

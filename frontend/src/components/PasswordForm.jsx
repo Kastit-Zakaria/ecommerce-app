@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import useAuth from '../context/useAuth';
+import useFocusAfterSubmit from '../hooks/useFocusAfterSubmit';
 
 // Longueur minimale affichée en indication (la règle est contrôlée par l'API)
 const INT_PASSWORD_MIN_LENGTH = 8;
@@ -17,6 +18,7 @@ const OBJ_EMPTY_FORM = {
     confirmation: '',
 };
 
+
 // PasswordForm : section « Modifier mon mot de passe » de la page Mon compte
 // Reçoit : rien
 // Renvoie : le JSX de la section et de son formulaire
@@ -29,6 +31,8 @@ const PasswordForm = () => {
     const [strError, fSetStrError] = useState('');
     const [strSuccess, fSetStrSuccess] = useState('');
     const objSavingRef = useRef(false);
+    // Champs et message de confirmation, pour y placer le focus après l'envoi
+    const { fSetTargetRef, fRequestFocus } = useFocusAfterSubmit();
 
     // fHandleChange : met à jour un champ du formulaire
     // Reçoit : objEvent (l'événement de saisie ; le nom du champ est dans objEvent.target.name)
@@ -44,7 +48,8 @@ const PasswordForm = () => {
     // fHandleSubmit : envoie le changement de mot de passe
     // Reçoit : objEvent (l'événement de soumission)
     // Renvoie : une promesse
-    // Pourquoi : appeler l'API une seule fois, afficher le résultat et ne jamais garder les mots de passe saisis
+    // Pourquoi : appeler l'API une seule fois, afficher le résultat, ne jamais garder les mots de passe saisis
+    //            et placer le focus sur la confirmation ou, après un refus, sur le premier champ à ressaisir
     const fHandleSubmit = async (objEvent) => {
         objEvent.preventDefault();
         if (objSavingRef.current) {
@@ -58,12 +63,15 @@ const PasswordForm = () => {
         try {
             await fChangePassword(objForm);
             fSetStrSuccess('Votre mot de passe a été modifié.');
+            fRequestFocus('success');
         } catch (objError) {
             let strMessage = 'Impossible de modifier le mot de passe. Veuillez réessayer plus tard.';
             if (objError.response && objError.response.data && objError.response.data.message) {
                 strMessage = objError.response.data.message;
             }
             fSetStrError(strMessage);
+            // Les trois champs sont vidés : la saisie reprend toujours au mot de passe actuel
+            fRequestFocus(TB_FIELDS[0].strName);
         } finally {
             // Les champs sont vidés après chaque tentative, réussie ou non
             fSetObjForm(OBJ_EMPTY_FORM);
@@ -83,7 +91,15 @@ const PasswordForm = () => {
             {strError !== '' && <p className="account-page__error" role="alert">{strError}</p>}
             {/* Zone d'état toujours présente : la confirmation est annoncée aux lecteurs d'écran à son apparition */}
             <div role="status">
-                {strSuccess !== '' && <p className="account-page__success">{strSuccess}</p>}
+                {strSuccess !== '' && (
+                    <p
+                        className="account-page__success"
+                        tabIndex={-1}
+                        ref={(objElement) => { fSetTargetRef('success', objElement); }}
+                    >
+                        {strSuccess}
+                    </p>
+                )}
             </div>
 
             {/* noValidate : les champs vides reçoivent aussi le message de l'API, annoncé comme les autres erreurs */}
@@ -100,6 +116,7 @@ const PasswordForm = () => {
                             <div className="account-page__row" key={objField.strName}>
                                 <label className="account-page__label" htmlFor={objField.strId}>{objField.strLabel}</label>
                                 <input
+                                    ref={(objElement) => { fSetTargetRef(objField.strName, objElement); }}
                                     id={objField.strId}
                                     name={objField.strName}
                                     type="password"

@@ -184,6 +184,80 @@ describe('US6 : modification du mot de passe', () => {
         await screen.findByText('Votre mot de passe a été modifié.');
     });
 
+    it.each([
+        {
+            strCase: 'mot de passe actuel faux',
+            objData: { message: 'Le mot de passe actuel est incorrect.', field: 'currentPassword' },
+        },
+        {
+            strCase: 'nouveau mot de passe trop court',
+            objData: { message: 'Le mot de passe doit contenir au moins 8 caractères.', field: 'newPassword' },
+        },
+        {
+            strCase: 'nouveau mot de passe trop long',
+            objData: { message: 'Le mot de passe est trop long.', field: 'newPassword' },
+        },
+        {
+            strCase: 'nouveau mot de passe identique à l\'actuel',
+            objData: { message: 'Le nouveau mot de passe doit être différent de l\'actuel.', field: 'newPassword' },
+        },
+        {
+            strCase: 'confirmation vide',
+            objData: { message: 'Tous les champs sont obligatoires.', field: 'confirmation' },
+        },
+        {
+            strCase: 'confirmation différente',
+            objData: { message: 'La confirmation ne correspond pas au nouveau mot de passe.' },
+        },
+        {
+            strCase: 'origine refusée',
+            objData: { message: 'Origine non autorisée.' },
+        },
+    ])('refus ($strCase) : vide les champs et place le focus sur « Mot de passe actuel »', async ({ objData }) => {
+        objApi.put.mockRejectedValue({ response: { status: 400, data: objData } });
+        await fRender();
+        await fFill('MotDePasse-1', 'MotDePasse-2', 'MotDePasse-2');
+
+        await fSubmit();
+
+        await waitFor(() => expect(screen.getByLabelText('Mot de passe actuel')).toHaveFocus());
+        expect(screen.getByRole('alert')).toHaveTextContent(objData.message);
+        fExpectEmptyFields();
+    });
+
+    it('place le focus sur le premier champ si le serveur ne répond pas', async () => {
+        objApi.put.mockRejectedValue(new Error('réseau'));
+        await fRender();
+        await fFill('MotDePasse-1', 'MotDePasse-2', 'MotDePasse-2');
+
+        await fSubmit();
+
+        await waitFor(() => expect(screen.getByLabelText('Mot de passe actuel')).toHaveFocus());
+    });
+
+    it('après un succès, place le focus sur le message de confirmation', async () => {
+        await fRender();
+        await fFill('MotDePasse-1', 'MotDePasse-2', 'MotDePasse-2');
+
+        await fSubmit();
+
+        const objMessage = await screen.findByText('Votre mot de passe a été modifié.');
+        expect(objMessage).toHaveAttribute('tabindex', '-1');
+        await waitFor(() => expect(objMessage).toHaveFocus());
+    });
+
+    it('replace le focus à chaque envoi, même si le refus est identique', async () => {
+        objApi.put.mockRejectedValue({ response: { status: 400, data: { message: 'Le mot de passe actuel est incorrect.' } } });
+        await fRender();
+        await fSubmit();
+        await waitFor(() => expect(screen.getByLabelText('Mot de passe actuel')).toHaveFocus());
+
+        await fSubmit();
+
+        await waitFor(() => expect(screen.getByLabelText('Mot de passe actuel')).toHaveFocus());
+        expect(objApi.put).toHaveBeenCalledTimes(2);
+    });
+
     it('oublie le membre si la session a expiré', async () => {
         objApi.put.mockRejectedValue({ response: { status: 401, data: { message: 'Non connecté.' } } });
         await fRender();
