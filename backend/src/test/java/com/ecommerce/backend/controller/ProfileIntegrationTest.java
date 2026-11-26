@@ -96,6 +96,49 @@ class ProfileIntegrationTest {
         assertEquals("ROLE_USER", objFresh.getRole()); assertEquals(strHash, objFresh.getPasswordHash());
         assertEquals("Dupont", objUserRepository.findById(objOther.getId()).orElseThrow().getLastName());
     }
+    // fAssertFieldError : vérifie le code, le message et le champ désigné d'un refus
+    // Reçoit : strBody (le corps envoyé), intStatus, strMessage, strField (les valeurs attendues)
+    // Renvoie : rien
+    // Pourquoi : le front place le focus d'après "field"
+    private void fAssertFieldError(String strBody, int intStatus, String strMessage, String strField) throws Exception {
+        objMockMvc.perform(put("/api/auth/me").session(objSession).contentType(MediaType.APPLICATION_JSON)
+                        .content(strBody))
+                .andExpect(status().is(intStatus))
+                .andExpect(jsonPath("$.message").value(strMessage))
+                .andExpect(jsonPath("$.field").value(strField));
+    }
+    // fErrorsNameTheField : chaque refus de saisie désigne le champ à corriger
+    // Reçoit : rien. Renvoie : rien. Pourquoi : champ vide, trop long, e-mail invalide ou déjà utilisé.
+    @Test void fErrorsNameTheField() throws Exception {
+        String strRequired = "Tous les champs sont obligatoires.";
+        fAssertFieldError("{}", 400, strRequired, "firstName");
+        fAssertFieldError(STR_PROFILE.replace("\"Martin\"", "\" \""), 400, strRequired, "lastName");
+        fAssertFieldError(STR_PROFILE.replace("camille@exemple.com", ""), 400, strRequired, "email");
+        fAssertFieldError(STR_PROFILE.replace("Rue Neuve 20", ""), 400, strRequired, "address");
+        fAssertFieldError(STR_PROFILE.replace("9000", ""), 400, strRequired, "postalCode");
+        fAssertFieldError(STR_PROFILE.replace("Gand", "  "), 400, strRequired, "city");
+
+        fAssertFieldError(STR_PROFILE.replace(" Camille ", "x".repeat(101)), 400,
+                "Le prénom ne doit pas dépasser 100 caractères.", "firstName");
+        fAssertFieldError(STR_PROFILE.replace("Martin", "x".repeat(101)), 400,
+                "Le nom ne doit pas dépasser 100 caractères.", "lastName");
+        fAssertFieldError(STR_PROFILE.replace("camille@exemple.com", "x".repeat(250) + "@exemple.com"), 400,
+                "L'adresse e-mail ne doit pas dépasser 255 caractères.", "email");
+        fAssertFieldError(STR_PROFILE.replace("Rue Neuve 20", "x".repeat(256)), 400,
+                "L'adresse ne doit pas dépasser 255 caractères.", "address");
+        fAssertFieldError(STR_PROFILE.replace("9000", "x".repeat(11)), 400,
+                "Le code postal ne doit pas dépasser 10 caractères.", "postalCode");
+        fAssertFieldError(STR_PROFILE.replace("Gand", "x".repeat(101)), 400,
+                "La ville ne doit pas dépasser 100 caractères.", "city");
+
+        fAssertFieldError(STR_PROFILE.replace("camille@exemple.com", "invalide"), 400,
+                "L'adresse e-mail n'est pas valide.", "email");
+        fAssertFieldError(STR_PROFILE.replace("camille@exemple.com", "autre@exemple.com"), 409,
+                "Un compte existe déjà avec cette adresse e-mail.", "email");
+
+        objMockMvc.perform(put("/api/auth/me").contentType(MediaType.APPLICATION_JSON).content(STR_PROFILE))
+                .andExpect(status().isUnauthorized()).andExpect(jsonPath("$.field").doesNotExist());
+    }
     @Test void fCrossOriginWriteRejected() throws Exception {
         objMockMvc.perform(put("/api/auth/me").session(objSession).header("Origin", "https://autre.invalid")
                 .contentType(MediaType.APPLICATION_JSON).content(STR_PROFILE)).andExpect(status().isForbidden());

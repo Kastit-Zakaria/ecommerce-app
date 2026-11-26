@@ -102,8 +102,23 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // fChangePassword : envoie le changement de mot de passe à l'API
+    // Reçoit : objPasswords { currentPassword, newPassword, confirmation } (transmis une seule fois, jamais conservés)
+    // Renvoie : une promesse ; elle échoue avec l'erreur de l'API, dont le message est affichable à l'écran
+    // Pourquoi : modifier le mot de passe en gardant le membre connecté ; seule une session expirée (401) le déconnecte
+    const fChangePassword = async (objPasswords) => {
+        try {
+            await objApi.put('/auth/me/password', objPasswords);
+        } catch (objError) {
+            if (objError.response && objError.response.status === 401) {
+                fSetObjUser(null);
+            }
+            throw objError;
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ objUser, blChecking, fLogin, fRegister, fLogout, fRefreshProfile, fUpdateProfile }}>
+        <AuthContext.Provider value={{ objUser, blChecking, fLogin, fRegister, fLogout, fRefreshProfile, fUpdateProfile, fChangePassword }}>
             {children}
         </AuthContext.Provider>
     );

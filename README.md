@@ -33,3 +33,5 @@ Les documents livrés sont au format PDF, dans `docs/pdf/` :
 - [Cahier de tests fonctionnels](docs/pdf/tests-fonctionnels.pdf) : tests manuels à dérouler avant une livraison, avec les résultats de la dernière exécution.
 
 Les fichiers Markdown du dossier `docs/` (`guide-utilisateur.md`, `documentation-technique.md`, `deploiement.md`, `tests-fonctionnels.md`) sont les sources modifiables de ces PDF : toute mise à jour se fait dans ces fichiers, puis les PDF sont régénérés.
+
+Pour les régénérer, depuis la racine du dépôt : `npm --prefix outils/generer-pdf run generer`. Les prérequis et les options (choix des documents, date, version) sont décrits dans [`outils/generer-pdf/README.md`](outils/generer-pdf/README.md).

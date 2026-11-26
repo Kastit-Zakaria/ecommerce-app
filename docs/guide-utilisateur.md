@@ -226,7 +226,7 @@ La page **Mon compte** regroupe les informations de votre compte. Elle est rése
 1. Cliquez sur l'icône **« Mon compte »** en haut à droite.
 2. Dans le menu, cliquez sur **« Paramètres »**.
 
-La page affiche, sous le titre **« Vos informations personnelles »**, six champs préremplis : **Prénom**, **Nom**, **Adresse e-mail**, **Adresse**, **Code postal** et **Ville**.
+La page affiche, sous le titre **« Vos informations personnelles »**, six champs préremplis : **Prénom**, **Nom**, **Adresse e-mail**, **Adresse**, **Code postal** et **Ville**. Plus bas, la section [**« Modifier mon mot de passe »**](#modifier-votre-mot-de-passe) permet de changer votre mot de passe.
 
 ![Page « Mon compte » avec le formulaire des informations personnelles](images/mon-compte-formulaire.png)
 
@@ -235,7 +235,7 @@ La page affiche, sous le titre **« Vos informations personnelles »**, six cham
 1. Corrigez le ou les champs souhaités.
 2. Cliquez sur **« Enregistrer les modifications »**. Pendant l'envoi, le bouton affiche « Enregistrement… » et les champs ne sont plus modifiables.
 
-Si l'enregistrement réussit, le message **« Vos informations ont été mises à jour. »** s'affiche en haut du formulaire. Il disparaît dès que vous modifiez de nouveau un champ.
+Si l'enregistrement réussit, le message **« Vos informations ont été mises à jour. »** s'affiche en haut du formulaire et le curseur se place sur ce message. Il disparaît dès que vous modifiez de nouveau un champ.
 
 ![Message de confirmation après une modification réussie](images/mon-compte-confirmation.png)
 
@@ -244,7 +244,7 @@ Bon à savoir :
 - Si vous changez votre **prénom**, la mention « Bienvenue, » de l'en-tête est mise à jour aussitôt.
 - Si vous changez votre **adresse e-mail**, c'est la nouvelle adresse qui vous servira pour vous connecter la prochaine fois. Vous restez connecté(e) pendant le changement.
 - Vos modifications sont enregistrées : elles restent affichées si vous rechargez la page ou si vous revenez plus tard.
-- Le **mot de passe** ne se modifie pas sur cette page.
+- Le **mot de passe** se modifie à part, avec son propre formulaire : le bouton « Enregistrer les modifications » ne le change pas.
 
 **Règles à respecter**
 
@@ -255,17 +255,64 @@ Bon à savoir :
 
 **Si l'enregistrement n'aboutit pas**
 
-Si un champ est vide, ou si l'adresse e-mail ne contient pas d'arobase (@), votre navigateur signale le champ à corriger (par exemple « Veuillez renseigner ce champ. ») et rien n'est envoyé. Dans les autres cas, un message en rouge s'affiche en haut du formulaire. Vos saisies sont conservées pour que vous puissiez les corriger.
+Si un champ est vide, ou si l'adresse e-mail ne contient pas d'arobase (@), votre navigateur signale le champ à corriger (par exemple « Veuillez renseigner ce champ. ») et rien n'est envoyé. Dans les autres cas, un message en rouge s'affiche en haut du formulaire et le curseur se place sur le champ à corriger (sur « Prénom » si aucun champ précis n'est en cause, par exemple quand le serveur ne répond pas). Vos saisies sont conservées pour que vous puissiez les corriger.
 
 | Message affiché | Ce que cela signifie | Que faire |
 |-----------------|----------------------|-----------|
-| « Tous les champs sont obligatoires. » | Un champ ne contient que des espaces. | Remplissez le champ concerné. |
+| « Tous les champs sont obligatoires. » | Un champ ne contient que des espaces. | Remplissez le champ indiqué par le curseur. |
 | « L'adresse e-mail n'est pas valide. » | L'adresse n'a pas la forme `nom@domaine.be` (par exemple, l'extension « .be » manque). | Corrigez l'adresse e-mail. |
 | « Un compte existe déjà avec cette adresse e-mail. » | Cette adresse appartient déjà à un autre compte. | Utilisez une autre adresse. |
 | « Impossible d'enregistrer les modifications. Veuillez réessayer. » | Le site ne parvient pas à joindre le serveur. | Réessayez dans quelques instants. |
 | « Impossible de charger vos informations. Veuillez réessayer. » | Vos informations n'ont pas pu être affichées à l'ouverture de la page. | Cliquez sur le bouton **« Réessayer »** qui s'affiche sous le message. |
 
 ![Modification refusée : « L'adresse e-mail n'est pas valide. »](images/mon-compte-erreur.png)
+
+### Modifier votre mot de passe
+
+La section **« Modifier mon mot de passe »** se trouve sur la page Mon compte, sous vos informations personnelles.
+
+![Section « Modifier mon mot de passe » avec ses trois champs vides](images/mon-compte-mot-de-passe.png)
+
+1. Dans **« Mot de passe actuel »**, saisissez le mot de passe que vous utilisez aujourd'hui pour vous connecter.
+2. Dans **« Nouveau mot de passe »**, saisissez le mot de passe que vous voulez utiliser désormais. Votre navigateur peut vous en proposer un.
+3. Dans **« Confirmer le nouveau mot de passe »**, saisissez-le une seconde fois, à l'identique.
+4. Cliquez sur **« Modifier le mot de passe »**. Pendant l'envoi, le bouton affiche « Modification… » et les champs ne sont plus modifiables.
+
+Si le changement réussit, le message **« Votre mot de passe a été modifié. »** s'affiche en haut de la section et le curseur se place sur ce message. **Vous restez connecté(e)**. À votre prochaine connexion, utilisez le nouveau mot de passe : l'ancien n'est plus accepté.
+
+![Message de confirmation après le changement du mot de passe](images/mon-compte-mot-de-passe-confirmation.png)
+
+**Règles à respecter**
+
+- **Les trois champs sont obligatoires.**
+- Le nouveau mot de passe compte **8 caractères minimum** et 72 caractères au maximum (moins s'il contient des lettres accentuées ou des symboles spéciaux).
+- La confirmation doit être identique au nouveau mot de passe, majuscules et minuscules comprises.
+- Le nouveau mot de passe doit être différent de l'actuel.
+- Les espaces font partie du mot de passe : ils ne sont pas retirés.
+
+**Si le changement n'aboutit pas**
+
+Un message en rouge s'affiche en haut de la section et votre mot de passe reste inchangé. Vous restez connecté(e).
+
+Le curseur se place ensuite :
+
+- sur **« Mot de passe actuel »** si ce mot de passe est incorrect, si la confirmation ne correspond pas au nouveau mot de passe, ou si le serveur ne répond pas ;
+- sur **« Nouveau mot de passe »** s'il est trop court, trop long ou identique à l'actuel ;
+- sur le **premier champ resté vide**, s'il en manque un.
+
+| Message affiché | Ce que cela signifie | Que faire |
+|-----------------|----------------------|-----------|
+| « Tous les champs sont obligatoires. » | Au moins un des trois champs est vide. | Remplissez les trois champs. |
+| « Le mot de passe actuel est incorrect. » | Le premier champ ne correspond pas à votre mot de passe. | Saisissez de nouveau votre mot de passe actuel. |
+| « Le mot de passe doit contenir au moins 8 caractères. » | Le nouveau mot de passe est trop court. | Choisissez un mot de passe plus long. |
+| « Le mot de passe est trop long. » | Le nouveau mot de passe dépasse la longueur acceptée. | Choisissez un mot de passe plus court. |
+| « La confirmation ne correspond pas au nouveau mot de passe. » | Les deux saisies du nouveau mot de passe sont différentes. | Saisissez-les de nouveau, à l'identique. |
+| « Le nouveau mot de passe doit être différent de l'actuel. » | Vous avez repris votre mot de passe actuel. | Choisissez un autre mot de passe. |
+| « Impossible de modifier le mot de passe. Veuillez réessayer plus tard. » | Le site ne parvient pas à joindre le serveur. | Réessayez dans quelques instants. |
+
+![Changement refusé : « Le mot de passe actuel est incorrect. »](images/mon-compte-mot-de-passe-erreur.png)
+
+Par sécurité, **les trois champs sont vidés après chaque tentative**, réussie ou non. Le message disparaît à la tentative suivante ; la confirmation disparaît aussi dès que vous saisissez de nouveau.
 
 > **À savoir :** si vous ouvrez l'adresse de la page Mon compte sans être connecté(e), vous êtes ramené(e) à l'accueil et la fenêtre de connexion s'ouvre. Si votre session a expiré pendant que vous étiez sur la page, vous êtes ramené(e) à l'accueil : reconnectez-vous, puis recommencez la modification.
 
